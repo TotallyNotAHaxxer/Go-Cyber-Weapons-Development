@@ -1,0 +1,2 @@
+# Go-Cyber-Weapons-Development
+This is a tutorial on cyber weapons development, a tutorial / book that will progress on and on the more knowledge and things i find to write about using the go programming language. This will teach you on the go programming language. and how to build cyber weapons using go like Google engines, Mac tracers, PCAP parsers, data parsers, and much more that would benefit you in this field
