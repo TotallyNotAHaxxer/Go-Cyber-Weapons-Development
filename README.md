@@ -117,47 +117,30 @@ this code is quite simple, it first starts by delaring the type as discussed bef
 
 Pretty simple right? 
 
-this is where it can get tricky, outputting data in a normal structure like this can be quite simple however in the next example like the more tedious structure it can pend, this leads us into our next section which is introducing slices in structures.
+this is where it can get tricky, outputting data in a normal structure like this can be quite simple however in the next example like the more tedious structure it can pend, this leads us into our next section which is introducing more complexity in structures.
 
 > introducing slices under structures 
 
-Every data structure can have a value of any data type in go, this include `int, string, rune, int32, int64, uint, uint64, uint32, interface, []string, []int, []byte, byute, []rune, etc....`
-
-when a value has a slice in it you typically will need to access that variable via for loop, not too advanced or too robust but its a start.
-
-the following code mods this structure by introducing a new structure called possible ages 
-
+The further you go on in the hacking relm, and writing hacking tools or even simple recon tools in go you will realize the more you will find yourself needing to use something like a chained structure ( in a sense a chained structure is where two structures are linked together by one variable in that structure ), using slices, or even using for loops and what not to access variables. The following example will introduce you to two structures, one which chains the second structure together. 
 
 ```go
-package main 
+package main
 
-type User_Data struct {
-    Username string
-    Data struct {
-      User_Personal_Info []struct {
-             User_Real_Name string
-             User_Real_Age int
-             User_Real_Number
-        }
-    }
+import "fmt"
+
+type Address struct {
+    city    string
+    country string
 }
 
-var user_data User_Data
-
-func Set_Variables() {
-      user_data.Username = "user2393294824"
-      for i := 0; i < 2; i++ {
-            user_data.Data.User_Personal_Info[i].User_Real_Name  = "jake"
-            user_data.Data.User_Personal_Info[i].User_Real_Age   = 30
-      }
+type User struct {
+    name string
+    age  int
+    Address
 }
 
 func main() {
-  println("Username -> ", user_data.Username)
-  for k := 0; k < len(user_data.Data.User_Personal_Info); k++ {
   
-  }
 }
 
 ```
-
