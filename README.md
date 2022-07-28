@@ -273,6 +273,37 @@ func main() {
  
  `package main is not a main package`
 
+in order to do this you must create whats called a `go.mod` file, if you do not know go.mod files are exactly what they are, they are module decleration files that go uses to define a package or library or module whatever you want to call it as what it is.
+
+**contents of a typical go.mod file**
+
+```
+module module_name
+
+go 1.17
+```
+
+the syntax is `module` which has an argument of whatever the module name is for example if you run `go mod init main` the file will say `module main` and `go 1.17` which defines the go language version. Go.mod is also what you will use to write modules and import filepaths. Alot of tutorials i have seen do not properly show you how to setup modules which is why i am going through this, so you get a deeper understanding of how the go programming language works. lets create a module that outputs and fills out the data of a structure 
+
+first create a file named `modules`
+
+im on linux so inside of a directory im going to use `mkdir modules`
+
+then open that directory again since im on linux im going to touch the following files `touch Variables.go Filler.go Runner.go `
+
+once done open all three files and name them all at the top like this `package Struture_Example`
+
+the package name is up to you but for this example we will be using that. 
+
+
+here is a screenshot 
+
+![Image of all three files](git/example_1.png)
+
+
+
+
+
 
 > sum it up
 
