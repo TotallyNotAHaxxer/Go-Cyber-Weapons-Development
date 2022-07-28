@@ -36,3 +36,128 @@ Moving on, the next section will talk about running functions with types, channe
 
 
 no this is not a promotion they just helped me alot in the area
+
+
+# Writing good code
+
+in todays world there is not much programmers who prefer writing advanced code because to them it is not worth it, they do not want to go through the work of writing good, secure, and robust code. Therefore in this section i will be talking about making use of golangs types, funcs, maps, and certian statments that might actually make you're code worthwhile downloading and using. Side note, i know it sounds weird `programmers do not want to do the work` but its true, i rarely come across people with skill in this field that have a passion, usually its just people here to make a living and get it for the money which as we see in everyday jobs like certian government jobs putting money first can endanger someones life, likewise in this field you are putting systems at risk if you do not write secure, well written, robust code. For the sake of this tutorial i will not be going over to advanced concepts like the following keywords `go, go func, chan` however i will use data types and conversions like implimenting json into data structures, functions into maps, and using data types like Interface to write decent code.
+
+
+
+##### Using Types and data structures ####
+
+Whenever you make engines, ajax spiders, sometimes even tools to fetch data from a API you may want to use types to format data and output it properly, unmarshal JSON, YAML, XML, or other various data typing languages, storing data across modules to access it for later, or simply just load functions with types it is ideal to use them. 
+
+> Why use a type structure over something like a list of variables 
+
+Variables are good to use, however type structures are way more consistent to use, more versatile, and allow you to mix data format like JSON and XML, which means if you needed to you can parse a response body in JSON and use the structure to access the data held inside of the variables.
+
+Using types have the following syntax 
+
+
+```
+
+type Structure_name struct {
+      Variable Data_type
+}
+```
+
+say we wanted to init a type named Users and we wanted to have three values, one is a string, and the other two are integers, we would do the following 
+
+
+```go
+type Users struct {
+      Username string 
+      Age int 
+      Needed_age int
+}
+```
+
+`Users` is the data structures name <br>
+
+`Username` is the username which must be a string, any other value that is a different type we try to assign it will not be accepted.<br>
+
+`Age` is the users age which will accept a value of type integer 
+
+`Needed_age` is the same as age, it will only accept a value that is of type integer 
+
+<br>
+
+it is pretty simple right? This should be a 123 to understand, types as you move on more and more in go will get more complex such as assigning new structures under a already pre defined structure, or mashing types and data formats togther. Throughout this tutorial we will be using type structures more and more so gte used to them.
+
+
+> Accessing the type structure 
+
+
+Accessing and using data types can be a bit wacky, sometimes you may even find yourself using for loops, range statements, maps to access variables which is what we will talk about here.
+
+In order to print data or output data from a structure we need to first add values to the structure but first initiate the structure.
+
+
+```go
+package main 
+
+type Users struct {
+    Username string
+    Age int
+    Needed_age int
+}
+
+var Username_init Users
+
+
+func main() {
+    Username_init.Username = "jake1234"
+    Username_init.Age      = 19
+    Username_init.Needed_age = 18
+}
+```
+
+this code is quite simple, it first starts by delaring the type as discussed before, then it declares a global variable with the `var` keyword, this variable named `Username_init` is the initiation for the data structure, or the variable we will use to reach the values inside of the data structure. When accessing variables inside of a structure we must use the variable keyword `Username_init` followed by a `.` which will tell the program that we want to access a variable in the structure, then simply access the variable name inside of the structure then assign it a value, after the `.` the variable that you want to reach ( as long as it is reachable ) can be called, you can now use `Username_init.Username` to really anything, as an argument, to output data, or in this case to assign a value to that structurs variable. 
+
+Pretty simple right? 
+
+this is where it can get tricky, outputting data in a normal structure like this can be quite simple however in the next example like the more tedious structure it can pend, this leads us into our next section which is introducing slices in structures.
+
+> introducing slices under structures 
+
+Every data structure can have a value of any data type in go, this include `int, string, rune, int32, int64, uint, uint64, uint32, interface, []string, []int, []byte, byute, []rune, etc....`
+
+when a value has a slice in it you typically will need to access that variable via for loop, not too advanced or too robust but its a start.
+
+the following code mods this structure by introducing a new structure called possible ages 
+
+
+```go
+package main 
+
+type User_Data struct {
+    Username string
+    Data struct {
+      User_Personal_Info []struct {
+             User_Real_Name string
+             User_Real_Age int
+             User_Real_Number
+        }
+    }
+}
+
+var user_data User_Data
+
+func Set_Variables() {
+      user_data.Username = "user2393294824"
+      for i := 0; i < 2; i++ {
+            user_data.Data.User_Personal_Info[i].User_Real_Name  = "jake"
+            user_data.Data.User_Personal_Info[i].User_Real_Age   = 30
+      }
+}
+
+func main() {
+  println("Username -> ", user_data.Username)
+  for k := 0; k < len(user_data.Data.User_Personal_Info); k++ {
+  
+  }
+}
+
+```
+
