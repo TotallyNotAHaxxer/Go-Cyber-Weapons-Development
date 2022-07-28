@@ -716,6 +716,8 @@ func main() {
 
 when we run the program by `go run main.go` we get the output `user [ jake 's] countries currency is USD`
 
+this pretty much ends it as far as maps and structures can get on a decent level, lets now move onto 
+
 > sum it up
 
 
@@ -811,3 +813,16 @@ type Auto_Gen_Nmaprun struct {
 <-- snip
 }
 ```
+
+As far as modules go, modules are quite simple to understand in go despite the learning curve, i like to use modules alot as they come in handy when writing large code files or large projects like the red rabbit project as i wrote, if i stuffed 90,000+ lines of code including everything in the red rabbit project it would NOT be concurrent at all, it would be extremely slow, unprofessional, and even may have led to large amounts of bugs with conflicting types, maybe even a security vulnerability.
+
+In order to make handy, large, and usable scripts you usually especially in hacking may use something like a mock of a shell, or a large amount of arguments to run certian functions in the script, so this will move us onto the next advanced section in `Writing secure code`
+
+> Using Maps, Functions, and other things alike to achieve running functions and making trustable code
+
+I am going to start this off by saying 99.9% of the code you come across in languages like C coming from begginers is unsafe, especially when they are developing heafty programs and do not know of any common vulnerable functions, or how to dump memory, save memory, or properlly store values which can cause programs to be vulnerable to things like BOF making it easy for someone to exploit the binary. A good thing about go is typically even in some advanced robust situations you do not need to worry about managing memory, despite it having low level features go remains to take away aspects that can make code very vulnerable ( not all the time though ) so this next section will be talking about writing advanced code, and running user input the safe way, and as well as ways i never got to find without experience ( SHHHHHH its a secret ).
+
+
+Alot of people ask the question ( why use Maps or Switch statements instead of if then or if else statements ) 
+
+
