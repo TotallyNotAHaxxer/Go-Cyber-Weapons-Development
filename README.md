@@ -318,67 +318,7 @@ type Auto_Gen_Nmaprun struct {
 			} `xml:"extraports"`
 			Port []struct {
 				Text     string `xml:",chardata"`
-				Protocol string `xml:"protocol,attr"`
-				Portid   string `xml:"portid,attr"`
-				State    struct {
-					Text      string `xml:",chardata"`
-					State     string `xml:"state,attr"`
-					Reason    string `xml:"reason,attr"`
-					ReasonTtl string `xml:"reason_ttl,attr"`
-				} `xml:"state"`
-				Service struct {
-					Text      string   `xml:",chardata"`
-					Name      string   `xml:"name,attr"`
-					Product   string   `xml:"product,attr"`
-					Version   string   `xml:"version,attr"`
-					Extrainfo string   `xml:"extrainfo,attr"`
-					Ostype    string   `xml:"ostype,attr"`
-					Method    string   `xml:"method,attr"`
-					Conf      string   `xml:"conf,attr"`
-					Cpe       []string `xml:"cpe"`
-				} `xml:"service"`
-				Script []struct {
-					Text   string `xml:",chardata"`
-					ID     string `xml:"id,attr"`
-					Output string `xml:"output,attr"`
-					Table  []struct {
-						Text string `xml:",chardata"`
-						Elem []struct {
-							Text string `xml:",chardata"`
-							Key  string `xml:"key,attr"`
-						} `xml:"elem"`
-					} `xml:"table"`
-					Elem struct {
-						Text string `xml:",chardata"`
-						Key  string `xml:"key,attr"`
-					} `xml:"elem"`
-				} `xml:"script"`
-			} `xml:"port"`
-		} `xml:"ports"`
-		Times struct {
-			Text   string `xml:",chardata"`
-			Srtt   string `xml:"srtt,attr"`
-			Rttvar string `xml:"rttvar,attr"`
-			To     string `xml:"to,attr"`
-		} `xml:"times"`
-	} `xml:"host"`
-	Runstats struct {
-		Text     string `xml:",chardata"`
-		Finished struct {
-			Text    string `xml:",chardata"`
-			Time    string `xml:"time,attr"`
-			Timestr string `xml:"timestr,attr"`
-			Summary string `xml:"summary,attr"`
-			Elapsed string `xml:"elapsed,attr"`
-			Exit    string `xml:"exit,attr"`
-		} `xml:"finished"`
-		Hosts struct {
-			Text  string `xml:",chardata"`
-			Up    string `xml:"up,attr"`
-			Down  string `xml:"down,attr"`
-			Total string `xml:"total,attr"`
-		} `xml:"hosts"`
-	} `xml:"runstats"`
+<-- snip
 }
 
 
