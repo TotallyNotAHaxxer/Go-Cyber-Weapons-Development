@@ -302,8 +302,419 @@ here is a screenshot
 
 
 
+now in `Variables.go` define the following structure 
 
 
+```go
+package Structure_Example
+
+type Info struct {
+	City string 
+	Country string
+}
+
+type Data struct {
+	Username string
+	User_Data Info
+}
+```
+
+then in `Filler.go` put the following function in it
+
+```go
+func (p *Data) Fill_Structures() {
+	p.Username = "jake"
+	p.User_Data.City = "somecity"
+	p.User_Data.Country = "US"
+}
+```
+
+finally fill in the following in `Runner.go`
+
+
+```go
+package Struture_Example
+
+var International_Country_Code_To_Currency = map[string]string{
+	"BD": "BDT",
+	"BE": "EUR",
+	"BF": "XOF",
+	"BG": "BGN",
+	"BA": "BAM",
+	"BB": "BBD",
+	"WF": "XPF",
+	"BL": "EUR",
+	"BM": "BMD",
+	"BN": "BND",
+	"BO": "BOB",
+	"BH": "BHD",
+	"BI": "BIF",
+	"BJ": "XOF",
+	"BT": "BTN",
+	"JM": "JMD",
+	"BV": "NOK",
+	"BW": "BWP",
+	"WS": "WST",
+	"BQ": "USD",
+	"BR": "BRL",
+	"BS": "BSD",
+	"JE": "GBP",
+	"BY": "BYR",
+	"BZ": "BZD",
+	"RU": "RUB",
+	"RW": "RWF",
+	"RS": "RSD",
+	"TL": "USD",
+	"RE": "EUR",
+	"TM": "TMT",
+	"TJ": "TJS",
+	"RO": "RON",
+	"TK": "NZD",
+	"GW": "XOF",
+	"GU": "USD",
+	"GT": "GTQ",
+	"GS": "GBP",
+	"GR": "EUR",
+	"GQ": "XAF",
+	"GP": "EUR",
+	"JP": "JPY",
+	"GY": "GYD",
+	"GG": "GBP",
+	"GF": "EUR",
+	"GE": "GEL",
+	"GD": "XCD",
+	"GB": "GBP",
+	"GA": "XAF",
+	"SV": "USD",
+	"GN": "GNF",
+	"GM": "GMD",
+	"GL": "DKK",
+	"GI": "GIP",
+	"GH": "GHS",
+	"OM": "OMR",
+	"TN": "TND",
+	"JO": "JOD",
+	"HR": "HRK",
+	"HT": "HTG",
+	"HU": "HUF",
+	"HK": "HKD",
+	"HN": "HNL",
+	"HM": "AUD",
+	"VE": "VEF",
+	"PR": "USD",
+	"PS": "ILS",
+	"PW": "USD",
+	"PT": "EUR",
+	"SJ": "NOK",
+	"PY": "PYG",
+	"IQ": "IQD",
+	"PA": "PAB",
+	"PF": "XPF",
+	"PG": "PGK",
+	"PE": "PEN",
+	"PK": "PKR",
+	"PH": "PHP",
+	"PN": "NZD",
+	"PL": "PLN",
+	"PM": "EUR",
+	"ZM": "ZMK",
+	"EH": "MAD",
+	"EE": "EUR",
+	"EG": "EGP",
+	"ZA": "ZAR",
+	"EC": "USD",
+	"IT": "EUR",
+	"VN": "VND",
+	"SB": "SBD",
+	"ET": "ETB",
+	"SO": "SOS",
+	"ZW": "ZWL",
+	"SA": "SAR",
+	"ES": "EUR",
+	"ER": "ERN",
+	"ME": "EUR",
+	"MD": "MDL",
+	"MG": "MGA",
+	"MF": "EUR",
+	"MA": "MAD",
+	"MC": "EUR",
+	"UZ": "UZS",
+	"MM": "MMK",
+	"ML": "XOF",
+	"MO": "MOP",
+	"MN": "MNT",
+	"MH": "USD",
+	"MK": "MKD",
+	"MU": "MUR",
+	"MT": "EUR",
+	"MW": "MWK",
+	"MV": "MVR",
+	"MQ": "EUR",
+	"MP": "USD",
+	"MS": "XCD",
+	"MR": "MRO",
+	"IM": "GBP",
+	"UG": "UGX",
+	"TZ": "TZS",
+	"MY": "MYR",
+	"MX": "MXN",
+	"IL": "ILS",
+	"FR": "EUR",
+	"IO": "USD",
+	"SH": "SHP",
+	"FI": "EUR",
+	"FJ": "FJD",
+	"FK": "FKP",
+	"FM": "USD",
+	"FO": "DKK",
+	"NI": "NIO",
+	"NL": "EUR",
+	"NO": "NOK",
+	"NA": "NAD",
+	"VU": "VUV",
+	"NC": "XPF",
+	"NE": "XOF",
+	"NF": "AUD",
+	"NG": "NGN",
+	"NZ": "NZD",
+	"NP": "NPR",
+	"NR": "AUD",
+	"NU": "NZD",
+	"CK": "NZD",
+	"XK": "EUR",
+	"CI": "XOF",
+	"CH": "CHF",
+	"CO": "COP",
+	"CN": "CNY",
+	"CM": "XAF",
+	"CL": "CLP",
+	"CC": "AUD",
+	"CA": "CAD",
+	"CG": "XAF",
+	"CF": "XAF",
+	"CD": "CDF",
+	"CZ": "CZK",
+	"CY": "EUR",
+	"CX": "AUD",
+	"CR": "CRC",
+	"CW": "ANG",
+	"CV": "CVE",
+	"CU": "CUP",
+	"SZ": "SZL",
+	"SY": "SYP",
+	"SX": "ANG",
+	"KG": "KGS",
+	"KE": "KES",
+	"SS": "SSP",
+	"SR": "SRD",
+	"KI": "AUD",
+	"KH": "KHR",
+	"KN": "XCD",
+	"KM": "KMF",
+	"ST": "STD",
+	"SK": "EUR",
+	"KR": "KRW",
+	"SI": "EUR",
+	"KP": "KPW",
+	"KW": "KWD",
+	"SN": "XOF",
+	"SM": "EUR",
+	"SL": "SLL",
+	"SC": "SCR",
+	"KZ": "KZT",
+	"KY": "KYD",
+	"SG": "SGD",
+	"SE": "SEK",
+	"SD": "SDG",
+	"DO": "DOP",
+	"DM": "XCD",
+	"DJ": "DJF",
+	"DK": "DKK",
+	"VG": "USD",
+	"DE": "EUR",
+	"YE": "YER",
+	"DZ": "DZD",
+	"US": "USD",
+	"UY": "UYU",
+	"YT": "EUR",
+	"UM": "USD",
+	"LB": "LBP",
+	"LC": "XCD",
+	"LA": "LAK",
+	"TV": "AUD",
+	"TW": "TWD",
+	"TT": "TTD",
+	"TR": "TRY",
+	"LK": "LKR",
+	"LI": "CHF",
+	"LV": "EUR",
+	"TO": "TOP",
+	"LT": "LTL",
+	"LU": "EUR",
+	"LR": "LRD",
+	"LS": "LSL",
+	"TH": "THB",
+	"TF": "EUR",
+	"TG": "XOF",
+	"TD": "XAF",
+	"TC": "USD",
+	"LY": "LYD",
+	"VA": "EUR",
+	"VC": "XCD",
+	"AE": "AED",
+	"AD": "EUR",
+	"AG": "XCD",
+	"AF": "AFN",
+	"AI": "XCD",
+	"VI": "USD",
+	"IS": "ISK",
+	"IR": "IRR",
+	"AM": "AMD",
+	"AL": "ALL",
+	"AO": "AOA",
+	"AQ": "",
+	"AS": "USD",
+	"AR": "ARS",
+	"AU": "AUD",
+	"AT": "EUR",
+	"AW": "AWG",
+	"IN": "INR",
+	"AX": "EUR",
+	"AZ": "AZN",
+	"IE": "EUR",
+	"ID": "IDR",
+	"UA": "UAH",
+	"QA": "QAR",
+	"MZ": "MZN",
+}
+
+func (p *Data) Get_Currency() string {
+	Currency_Watcher := International_Country_Code_To_Currency[p.User_Data.Country]
+	return Currency_Watcher
+}
+
+```
+
+woah woah woah wtf? where did that come from, is probobly what you are thinking, this is simply to explain to let me :)
+
+The long list named International_Country_Code_To_Currency is a MAP, a MAP in go is a very versatile version of a data structure. Basically in a begginers sense a map allows you to take multiple data types and match them together, the syntax of a map is as follows
+
+```go
+map[Argument_data_type]Return_data_type
+```
+
+say we wanted to match names and ages right, but did not want to use a bunch of if else then statements, we make a map 
+
+```go
+var Ages = map[string]int {
+	"jake":1
+	"mark":19
+	"jan":32
+}
+```
+
+maps are used to compare and find things, most of the time if not all the time. So here instead of using an if statement we use a map to determin what user or what name is what age. Any data type that is inside of `[]` for example `[string]` will be the type of the argument you use to match to ages, and the value outside of `[]` example `[...]int` will be the value that is returned to you by the map. lets write a function before we contiue to understand how maps work 
+
+```go
+package main 
+
+var Ages = map[string]int {
+	"jake":1
+	"mark":19
+	"jan":32
+}
+
+
+func main() {
+	name := "mark"
+	fmt.Printf("%s is %v years old", name, Ages[name])
+}
+```
+
+the use of `Ages[name]` will return the number `19` this is because according to the map, the age of mark is 19 so the value returned by the map `IF MARK IS A VALID VALUE IN THE MAP` will return 19, then we format it so it says `mark is 19 years old`
+
+simple right? great lets move on 
+
+
+in this map here 
+
+```go
+var International_Country_Code_To_Currency = map[string]string{
+	"BD": "BDT",
+	"BE": "EUR",
+	"BF": "XOF",
+	"RU": "RUB",
+	"RW": "RWF",
+	"RS": "RSD",
+	"TL": "USD",
+	"RE": "EUR",
+	"TM": "TMT",
+	"TJ": "TJS",
+	"RO": "RON",
+	"TK": "NZD",
+	// SNIP
+}
+```
+
+we need a string as an argument to match in the map, and we will recieve a string if the value exists in the map, so we writwe the following function 
+
+```go
+func (p *Data) Get_Currency() string {
+	Currency_Watcher := International_Country_Code_To_Currency[p.User_Data.Country]
+	return Currency_Watcher
+}
+```
+
+this function like all other functions in this start off with a structure tag, if you do not know what a structure tag is in go a structure tag is when you use a value to relate, fill, add, subtract, take away, or print out values of a variable. it is quite literally the same thing as `var p Data` howevere the difference is this can only be used with every file of the same package name, if the file does not have the same package name as example ours `package Struture_Example` go will say that type structure does not exist, and we can not call it. To solve this you must go to a main file or whatever other module file you plan to import and in that `.go` file you must variable the data structure from an import, so say we do something like this 
+
+```go
+import Data_structure "gomod_module_name/modules"
+
+var Structure Data_structure.Data
+
+func Caller() {
+	Structure.Fill_Structures()
+}
+```
+
+now that you defined `structure` as apart of `Data_structure.Data{}` you can now call any function or variables THAT STARTS WITH A CAPITAL LETTER from that file which imports that data structure.
+
+
+it seems a bit complicated but trust me you WILL get used to it, moving onto what we do with this function. 
+
+the function `Get_Currency` will take the value from the variable `p.User_Data.Country` and match it up to the map, first we need to designate the maps output to a variable so we use `Currency_Watcher` to do that, with the final call being
+
+```go
+	Currency_Watcher := International_Country_Code_To_Currency[p.User_Data.Country]
+```
+
+now when we parse the data the variable `Currency_Watcher` should have the value `USD`, lets hop into our main.go file OUTSIDE OF THE MODULES DIRECTORY and put the following code in it 
+
+before hand i created a go.mod file named main with `go mod init main` so main is how i will import packages
+
+```go
+package main
+
+import (
+	"fmt"
+	Data_structures "main/modules"
+)
+
+type Currency struct {
+	Currency_by_code string
+}
+
+var s Data_structures.Data
+var dt Currency
+
+func main() {
+	s.Fill_Structures()
+	dt.Currency_by_code = s.Get_Currency()
+	fmt.Printf("user [ %s 's] countries currency is %v \n", s.Username, dt.Currency_by_code)
+}
+```
+
+when we run the program by `go run main.go` we get the output `user [ jake 's] countries currency is USD`
 
 > sum it up
 
