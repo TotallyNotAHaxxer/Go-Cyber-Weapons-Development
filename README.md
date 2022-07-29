@@ -24,6 +24,36 @@ I am currently learning my way back into hacking slamming into Car hacking and b
 
 Enough about me and what this is, lets dive in 
 
+# About this tutorial, its contents, and other things you should READ
+
+For this article i will be using the codium IDE for writing code, I highly suggest when you hop into the IDE that you install the extension for go, or gopls, this allows you to autoformat code, auto indent code, and auto import libraries ( standard only, unless pre defined in the go mod file), i did not discuss what libraries will be imported, but you will still see them being imported. Unless they are packages like BUF_IO or other packages that can have an advanced side i do not discuss anything about them other than what they are. If you are new to golang this tutorial is not suggested, this tutorial mainly discusses using the hacking field to not only advcance your skills in the programming world ( with Go ) but also give you a good understanding of the hacking field with a broader aspect, i know that came out weird sorry.
+
+anyway, unless you know a decent amount of go this includes 
+
+```
+functions, simple programs, for loops, arrays, slices, output, input, and things like file handle's 
+```
+
+then i highly suggest you visit and read <https://www.zetcode.com/all/#go> zetcode has been an AMAZING resource for me when i started out go, it took me months to find it when i was missing out on information about Go, i highly advise to you that you read all of the following sections 
+
+```
+Go intro 
+Go basics 
+Go build
+Go variable 
+Go function
+Go append function 
+Go make function 
+Go print functions
+Go predicate 
+Go Closure
+Go ellipses 
+Go operators 
+```
+
+There are way more sections to read through on this simple pdf/tutorial site, so please read through it to make sure you understand the language enough to go through this tutorial. Also note that i will be using advanced code samples further in, however i will be explaining how the code works in every way possible.
+
+
 # Why use go for cyber weapons 
 
 The go programming language is a very very robust, fast, lightweight language that gives you the speed of a low level language with the features of a high level programming language. Outside of the C language and C++ language ( Tutorial coming on that soon ), Go is one of the better programming languages for hacking with the amount of features and its robust code. I am not going to be your everyday author, or writer, im not going to glorify a programming language, sure i will say its good for a certian topic and back it up but i also want you to realize the issues with each language i talk about, moving on what are the cons of the Go programming language? Go is a great language, fast, again light and robust however its current syntax (as of writing, go is at `version 1.18`, if you are reading this when a newer version has come out, this information may or may not apply) is a bit wack, for begginers as i have come across many times the go programming syntax can be super weird to get used to, especially if you come from a language like python where everything is practically easy and fast to do.
@@ -1171,4 +1201,99 @@ Console  :>> signal: terminated
 ```
 
 inidcating the function `handle` works and is listening on another thread just like CTRL+C 
+
+
+We have finished the basic section to this tutorial, the very very first section, now it is time to use this knowledge to build net / host scanning tools, which brings us to our new section.
+
+
+# Using go for cybersecurity programs
+
+(Warning this will come off as bias, choose to ignore or read at your own risk) For the past few months i have been using Go as a primary language for any form of cyber security, code generation, and to my odd suprise go has been exceptional, it does not seem to be that complicated to build complex applications, robust code, or even things like mock ups of SQL managment solutions. I can personally say from experience in terms of typing, Go is a strongly, statically typed language, it was well writen and designed ( outside of the syntax ), and really lives up to its name `Go` anytime i need to go fast go is there to make that happen in cyber security and most things i choose to write in it, like http servers, web interfaces, or again cyber security tools.
+
+This section will talk about making a console like above to allow the user to create a metasploit based design for a terminal allowing a user to scan for hosts with robust and fast code. Scan for things like hosts, port on a host, and allow a user to set a host within the same session. 
+
+This will seem complex at first but there is a reason we steer away from easy code, thats because 100% of the time the most complex code is the most preformant, speedy, and more stable vs something like a bunch of if statements as discussed above.
+
+
+So what is the layout to this scanner and what do i mean by `msf like design`?
+
+for those who do not know project MSF is metasploit, and for those who have not used it metasploit is a interactive user based console, metasploit operates on modules for things like detecting commands like set, or scan or use like the following 
+
+
+** SETTING LHOST IN THE METASPLOIT CONSOLE **
+
+```
+                                                  
+                                              `:oDFo:`                            
+                                           ./ymM0dayMmy/.                          
+                                        -+dHJ5aGFyZGVyIQ==+-                    
+                                    `:sm⏣~~Destroy.No.Data~~s:`                
+                                 -+h2~~Maintain.No.Persistence~~h+-              
+                             `:odNo2~~Above.All.Else.Do.No.Harm~~Ndo:`          
+                          ./etc/shadow.0days-Data'%20OR%201=1--.No.0MN8'/.      
+                       -++SecKCoin++e.AMd`       `.-://///+hbove.913.ElsMNh+-    
+                      -~/.ssh/id_rsa.Des-                  `htN01UserWroteMe!-  
+                      :dopeAW.No<nano>o                     :is:TЯiKC.sudo-.A:  
+                      :we're.all.alike'`                     The.PFYroy.No.D7:  
+                      :PLACEDRINKHERE!:                      yxp_cmdshell.Ab0:    
+                      :msf>exploit -j.                       :Ns.BOB&ALICEes7:    
+                      :---srwxrwx:-.`                        `MS146.52.No.Per:    
+                      :<script>.Ac816/                        sENbove3101.404:    
+                      :NT_AUTHORITY.Do                        `T:/shSYSTEM-.N:    
+                      :09.14.2011.raid                       /STFU|wall.No.Pr:    
+                      :hevnsntSurb025N.                      dNVRGOING2GIVUUP:    
+                      :#OUTHOUSE-  -s:                       /corykennedyData:    
+                      :$nmap -oS                              SSo.6178306Ence:    
+                      :Awsm.da:                            /shMTl#beats3o.No.:    
+                      :Ring0:                             `dDestRoyREXKC3ta/M:    
+                      :23d:                               sSETEC.ASTRONOMYist:    
+                       /-                        /yo-    .ence.N:(){ :|: & };:    
+                                                 `:Shall.We.Play.A.Game?tron/    
+                                                 ```-ooy.if1ghtf0r+ehUser5`    
+                                               ..th3.H1V3.U2VjRFNN.jMh+.`          
+                                              `MjM~~WE.ARE.se~~MMjMs              
+                                               +~KANSAS.CITY's~-`                  
+                                                J~HAKCERS~./.`                    
+                                                .esc:wq!:`                        
+                                                 +++ATH`                            
+                                                  `
+
+
+       =[ metasploit v6.2.3-dev                           ]
++ -- --=[ 2227 exploits - 1172 auxiliary - 398 post       ]
++ -- --=[ 864 payloads - 45 encoders - 11 nops            ]
++ -- --=[ 9 evasion                                       ]
+
+Metasploit tip: Enable verbose logging with set VERBOSE 
+true
+
+[msf](Jobs:0 Agents:0) >> set lhost 1.1.1.1
+lhost => 1.1.1.1
+
+```
+
+that is something similar to what we want, we want the user to be able to change a host using a simple module named `set` and a value after that like `host` then the hostname after declaring those two variables, so how will we do it? just like we did with hello jake but a little bit more fancier than that.
+
+we next want the user to access a module named `scan` which will allow the following options 
+
+```
+ports and hostnames 
+```
+
+ports will be designed to scan ports, hostnames will be designed to get the hostname of the given IP, note the host must be an IP, this is something we will be designing this has nothing to do with go itself.
+
+simple scanner right? nothing to hard.
+
+First lets discuss how in a sense a simple port scanner will work, simply all a port scanner does is go under a range or for loop of ports an example in go would be 
+
+```go
+for port := 0; port < 65535; port++ {
+
+}
+```
+
+
+under that for loop it will attempt to connect to the host on that port, simply checking if the port works or is not being used, if it is being used it will be open, if not it will be closed. Programs like NMAP and MASSCAN will check for more data, try to probe the device for information, fingerprint and more. 
+
+
 
