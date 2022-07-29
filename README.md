@@ -825,4 +825,35 @@ I am going to start this off by saying 99.9% of the code you come across in lang
 
 Alot of people ask the question ( why use Maps or Switch statements instead of if then or if else statements ) 
 
+I will always say this, if statements are not bad, however in large amounts they can be quite CPU intensive which for a program is never good, sure if statements like 1 - 5 max are good but using something like 1 - 90 in one file just makes the program over slow, makes it unecessary to run on your system, takes up much if not ALOT of your system resources, can be more and more buggy, and can run into issues. Using MAPS and Switch statements will always be a better alternative, especially in the go programming language. A nice thing about go is go comes with a standard package called `bufio` or `BUFF` `IO` it allows the user to so much more better options for things like scanning text, user based input, file input and output, mainly I/O handleing, another thing about go is if we truly wanted to we can also use the data type `interface{}` with a map like the following code 
+
+```go
+var Data_map = map[string]interface{}
+```
+
+a interface basically allows you to add multiple types, kinda like in the programming language fortran when you declare a variable ( do not worry about that you do not need to remember it however if you want to view the fortran tutorial go here [https://www.github.com/ArkAngeL43/fortran-notes])
+
+this means this map can have multiple types, it can be a integer, data stucture, string, uint ...etc again really any data type. What does this have to do with if statements? Like other programming language you can pre define functions and add them into this map, so not only do we have secure Input/Output using BUFIO but we also can add a way more robust and fast way to execute functions based on a map. So how would this be designed?
+
+simple 
+
+* Take input from a USER using the `bufio` go standard package
+* Trim the user input telling it to ingore any input that starts a new line `when the user presses enter`
+* Create a map that will match up a command like "hello" or in other senses "set" then run a function if that command is found in the map \
+* Load back to the interactive console when the input and function have been parsed and run correctly with no error
+
+We will have 2 files 
+
+in a directory called `modules` create two files 
+
+**Commands.go**
+
+**Console.go**
+
+outside of the modules directory create a file named `main.go` and run the command `go mod init main`
+
+
+ 
+ 
+
 
