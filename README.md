@@ -1059,6 +1059,116 @@ func Run() {
 }
 ```
 
-and store it in a variabke called new_cmd, and if you wanted to get fancier use a data structure. anyway lets move on, we then declare a switch statement, if hello is the beggining of the command that we picked up from our shell we will parse the values of the data structure `Message` with anything after the word hello, so say we said `hello jake` the variable of Data structure `Message` named `Name` will now be `jake` note when we do this and we trim the spaces this is still not okay, sure it seems fine and it can be considered safe code however when we use `t[6:]` we are telling the value to assign the variable a value after the length of `5` which means we are still assuming and trusting the user added `hello` which if they are playing around with the program most likely is not going to happen, try it yourself and see what happens if you go overboard and use a character of 100 characters ( i will talk about this later ), anyway after the variable `Access.Name` is set, the parser function will be called with all correct values 
+and store it in a variable called new_cmd, and if you wanted to get fancier use a data structure. anyway lets move on, we then declare a switch statement, if hello is the beggining of the command that we picked up from our shell we will parse the values of the data structure `Message` with anything after the word hello, so say we said `hello jake` the variable of Data structure `Message` named `Name` will now be `jake` note when we do this and we trim the spaces this is still not okay, sure it seems fine and it can be considered safe code however when we use `t[6:]` we are telling the value to assign the variable a value after the length of `5` which means we are still assuming and trusting the user added `hello` which if they are playing around with the program most likely is not going to happen, try it yourself and see what happens if you go overboard and use a character of 100 characters ( i will talk about this later ), anyway after the variable `Access.Name` is set, the parser function will be called with all correct values. 
 
+Our full code reads the following ( in the console file )
+
+
+```go
+package Console_main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+)
+
+func Handelreturncon(c chan os.Signal) {
+	signal.Notify(c, os.Interrupt)
+	for s := <-c; ; s = <-c {
+		switch s {
+		case os.Interrupt:
+			fmt.Println("[-] Detected interruption")
+			os.Exit(0)
+		case os.Kill:
+			fmt.Println("GOT OS KILL")
+			os.Exit(0)
+		}
+	}
+}
+
+func Parser_With_Args(Module string, Map_of_choice map[string]interface{}, Module_Arg string) interface{} {
+	Module = strings.TrimSpace(Module)
+	dt := Map_of_choice[Module]
+	if dt == nil {
+	} else {
+		dt.(func(string))(Module_Arg)
+	}
+	return dt
+}
+
+func Run() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Console  :>> \033[37m")
+		t, _ := reader.ReadString('\n')
+		t = strings.Replace(t, "\n", "", -1)
+		go Handelreturncon(make(chan os.Signal, 1))
+		if string(t) != "" {
+			new_cmd := string(strings.TrimSpace(t[0:5]))
+			fmt.Println("Executing command -> ", new_cmd)
+			switch new_cmd {
+			case "hello":
+				Access.Name = string(strings.TrimSpace(t[6:]))
+				Parser_With_Args(new_cmd, Func_Map, string(strings.TrimSpace(t[6:])))
+
+			}
+
+		}
+	}
+
+}
+```
+
+now we must import this code and run it, coming from what we learned with the use of modules we can take the following code and write it in our `main.go` file OUTSIDE of the `modules` directory 
+
+```go
+package main
+
+import Utils "main/modules"
+
+func main() {
+	Utils.Run()
+}
+```
+
+
+when we run `go run main.go` or `go run .` and enter `hello jake` we get the following
+
+```
+Executing command ->  hello
+
+:> Hello there user! i see you set your name as jake
+
+Console  :>>
+```
+
+first it tells us we are executing the command hello, then it runs the function and outputs the message, and returns to the console, to exit we simply just `CTRL+C`
+
+```
+Console  :>> ^C[-] Detected interruption
+```
+
+and if we wanted to test the handle find the PID of the go file and kill to test if the os.kill switch works 
+
+
+in order ot get the PID we can simply add this line to the main.go file 
+
+```go
+fmt.Println("PID -> ", os.Getpid())
+```
+
+and ofc the `os` import under the import list
+
+for me the PID of this go file is `7016` yours may be different, but in this case open another shell and use the command `kill` to kill the PID, when we switch to the other terminal which is hosting the command shell we can see the following 
+
+```
+PID ->  7016
+Console  :>> signal: terminated
+
+```
+
+inidcating the function `handle` works and is listening on another thread just like CTRL+C 
 
