@@ -852,8 +852,213 @@ in a directory called `modules` create two files
 
 outside of the modules directory create a file named `main.go` and run the command `go mod init main`
 
+let us hop into the directory `modules` and start editing the Comamnds.go file, this file will be responsible for data types, maps, and the function we will run as well as the access variable for the data structure, the following code is what should be inside of the Commands.go file 
 
+```go
+package Console_main
+
+import "fmt"
+
+type Message struct {
+	Name string
+}
+
+var Access Message
+
+var Func_Map = map[string]interface{}{
+	"hello": Access.Hello_there,
+}
+
+func (QT *Message) Hello_there(filler string) {
+	fmt.Printf("\n:> Hello there user! i see you set your name as %s\n\n", QT.Name)
+}
+```
+
+
+First we declare our package name as `Console_main`, import fmt (go format package) for formatting, then declare a data structure which is named `Message`. Message is responsible for storing the variable / name we will output when running the function. then we declare `Access` which is the variable reacher as i like to call it to initate the Message data structure, we then define our map
+
+
+```go
+
+var Func_Map = map[string]interface{}{
+	"hello": Access.Hello_there,
+}
+```
+
+this map is named `Func_Map` and accepts a string as the command and returns a interface, the interface is what our functions will be, in this case we will be calling the Access variable with the Hello_there function, the function hello there accepts a filler as an argument `this is just for map parsing and the mean time`, it then describes the variable `(QT)` as the secondary variable to the `*Message` data structure. Note again functions that use `()` before the function name usually must be used as a type structure, meaning they can ONLY be called WITH A VARIABLE THAT REPRESENTS THAT DATA STRUCTURE, IN THIS INSTANCE WE USE `Access.Hello_there` TO CALL THE FUNCTION.
+
+Normally functions are called like `function()` but in this case we will not be adding the `()` instead just leaving it as is, this is because the parser we are about to write executes and runs the function with its required arguments without us needing to use `()` even if we wanted to go will manage to throw an error like the following 
+
+```go
+var Func_Map = map[string]interface{}{
+	"hello": Access.Hello_there(),
+}
+
+/*
+ ERROR -> 
+
+modules/Commands.go:12:29: not enough arguments in call to Access.Hello_there
+        have ()
+        want (string)
+
+*/
+```
+
+we would need to include the arguments which currently we do not have set, rather a parser will run that function to call that data and parse those values that is wanted by the function, so to do this hop into `Console.go`
  
  
+this is where things will start getting tricky, this file not only handels maps, but uses keywords like `chan, func` and symbols like `->` `<-` and `-`,
+
+the first step of our code will be to redeclare the package name 
+
+
+```go
+package Console_main 
+```
+
+then we will impliment something called `Handle Return CON` this is a function i often repeat in some of my code across the span of projects, it is a simple handler to handle CTRL+C or Operating System Terminate / KILL calls, so the user does not have to type `exit` in the console to exit.
+
+```go
+func Handle(ch chan os.Signal) {
+	signal.Notify(ch, os.Interrupt)
+	for k := <-ch; ; k = <-ch {
+	   switch s {
+	   	case os.Interrupt:
+			fmt.Println("[+] Killing process and exiting")
+			os.Exit(0)
+		case os.Kill:
+			fmt.Println("[*] Recived a signal to kill the program, exiting")
+			os.Exit(0)
+	   }
+	}
+}
+```
+
+i know i know, this is a huge step up so let me explain 
+
+we first use the keyword `chan` if you do not know what chan means, chan in go stands for channel, and channel's in go represent something called a `goroutine` well channels do not represent it but rather work along side of a goroutine, goroutines are lightweight standard threads go has, if you ever needed to pass data to a threaded function you would use something like `go` which uses the chan keyword, `ch` is defined as `chan os.Interrupt` in this, the handle will take the aruments given to the function, and pass the data of k to the channel `ch` using `<-` Arrows in go used along side of channels and threads are typically used to send or output data from channels, an example is when we define 
+
+```go
+for k := <-ch; ; k = <-ch {}
+```
+
+this is making K the new variable that holds the data sent to the channel when running the function, so in order to run or call this function we use 
+
+```go
+go Handle(make(chan os.Signal, 1))
+```
+
+if you dont know 
+
+the make built-in function allocates and initializes an object of type slice, map, or chan (only). Like new, the first argument is a type, not a value. Unlike new, make's return type is the same as the type of its argument, not a pointer to it. The specification of the result depends on the type.
+
+i stepped a bit far on that one but you will see where we call this function soon, moving onto the MAP and COMMAND parser we create a function called `Parser_With_Args` which looks like the following 
+
+```go
+func Parser_With_Args(Module string, Map_of_choice map[string]interface{}, Module_Arg string) interface{} {
+	Module = strings.TrimSpace(Module)
+	dt := Map_of_choice[Module]
+	if dt == nil {
+	} else {
+		dt.(func(string))(Module_Arg)
+	}
+	return dt
+}
+```
+
+this function requires 3 arguments and returns 1, the first argument `Module` is used to define the command, the module we will be accessing is `hello` so that will be the first argument, then we see `Map_of_choice map[string]interface{}` this argument requires a MAP, which we predefined in `Commands.go` the map we want to choose will be `Func_Map`, please note that we can not use any other map that is not alike, the Map_of_choice argument needs a map that accepts a argument of type string and outputs a interface{} if the map is `map[string]string` it will not be accepted into the function, due to obvious reasons, the type isnt supported.
+
+We have the final argument named `Module_Arg` this will be the argument we use to output the function, simply after we enter the command `hello` we add a value after that with whatever as long as there are no spaces, so if we enter `hello jake` the output will be `:> Hello there user! i see you set your name as jake`
+
+now moving on, We redefine the variable `Module` which we trim any and all spaces from that string, just to prevent errors in the module. Then we define `dt` which will be the runner, this variable is responsible for taking the map of choice, and matching it up to our command, so look at this example below 
+
+when we enter all our function arguments properly of the function `parser_With_Args` instead of it being 
+
+```go
+dt := Map_of_choice[Module]
+```
+
+it will look something like this ( note in the code ) 
+
+```go
+dt := Func_Map["Hello"]
+```
+
+exactly as discussed when parsing the currency of the users country a little bit above. Now we move onto the if statements, if the value of DT is nil meaning the map returned empty and the command was not found in the map then it will not do anything, else it will execute it using `dt.(func(string))(Module_Arg)` this can be a bit confusing, dt is the value of a map that is returned of type interface, it then goes onto use the `func` keyword in go which specifies a function without a name **NOTE THE FUNC KEYWORD CAN ONLY BE USED INSIDE FUNCTION BLOCKS NOT OUTSIDE**, then it calls for an argument of string, that argument will be the argument of the function in the map that is called or in our case `Access.Hello_there`, then outside of the func argument it specifies the argument it will send to the function which in our case would be something like `jake`
+
+
+i know it seems scary but trust me its not! 
+
+now we move onto the Run function, the RUN function is our console, our command line, the whole building block to executing commands and parsing values
+
+```go
+func Run() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Console  :>> \033[37m")
+		t, _ := reader.ReadString('\n')
+		t = strings.Replace(t, "\n", "", -1)
+		go Handelreturncon(make(chan os.Signal, 1))
+		if string(t) != "" {
+			fmt.Println("Executing command -> ", string(strings.TrimSpace(t[0:5])))
+			switch string(strings.TrimSpace(t[0:5])) {
+			case "hello":
+				Access.Name = string(strings.TrimSpace(t[6:]))
+				Parser_With_Args(string(strings.TrimSpace(t[0:5])), Func_Map, string(strings.TrimSpace(t[6:])))
+
+			}
+
+		}
+	}
+
+}
+```
+
+first we define the bufio.NewReader function with the variable reader, the reader will read user based input from the `OS STANDARD INPUT / OS STDIN`, we then proceed under a for loop, this will be where the magic is done, first we print a message which is `Console :>> ` this will let the user know that there is a listening command prompt there to accept commands. Then we define T which does a string read by reader `reader.ReadString('\n')` this will tell the reader to accept any values that are spaced, but when the user hits enter or starts a new line in the OS STDIN then it will cut and continue onto the block.
+
+Then we tell the variable of T to replace all of its values of `\n` with a empty value a more defined description of this function is 
+
+```
+Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
+```
+
+finally we call `go Handle(make(chan os.Signal, 1))` which calls our listener to pass data or to listen back and fourth on a thread to see if the user chooses to exit the program with CTRL+C or if they send a OS.KILL msg to the process. we then detect / test if t is empty, if it is not empty we proceed to output the command 
+
+```
+			fmt.Println("Executing command -> ", string(strings.TrimSpace(t[0:5])))
+```
+
+lets disect this a bit 
+
+first we make sure we use the built in function to go `string()` to convert `t` to a string or make sure its a string, then use strings.TrimSpace to trim all spaces of T then call `t[0:5]` this tells the program to read t from 0 - 5 the exact length of our command `hello`, the slicing works as so `string[beggining_of_string:end_length_of_string` in our example the string is `t` the `beggining of string` is `0` since thats the index the string starts at, then the `end length of string` is 5 because that is the total length of the command that is SUPPOSED to be predicted. This can be unsafe code since we are trusting that the user input a command of exactly a length of 5, or in this case hello. We should **NEVER TRUST THE USER FOR INPUT, MEANING WE SHOULD NEVER EVER EVER EVERRRRRR ALLOW THE USER TO INPUT WHATEVER THEY WANT, A MORE SECURE OPTION WOULD BE TO CHECK FOR THE LENGTH OF THE VARIABLE AND USE MATHEMATICS TO GET THE COMMANDS LENGTH, THIS IS NOT! AND I MEAN NOT!!!! RECOMENDED**
+
+Before i go on i would like to state, i heavily encourage you as a learner to experiment with this code, find out what causes a error or a segment violation in the code, edit it and even make changes you think would be better, like the following modifcation to the program, instead of cosntantly repeating `string(strings.TrimSpace(t[0:5])))` we could do 
+
+
+```go
+func Run() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Console  :>> \033[37m")
+		t, _ := reader.ReadString('\n')
+		t = strings.Replace(t, "\n", "", -1)
+		go Handelreturncon(make(chan os.Signal, 1))
+		if string(t) != "" {
+			new_cmd := string(strings.TrimSpace(t[0:5]))
+			fmt.Println("Executing command -> ", new_cmd)
+			switch new_cmd {
+			case "hello":
+				Access.Name = string(strings.TrimSpace(t[6:]))
+				Parser_With_Args(new_cmd, Func_Map, string(strings.TrimSpace(t[6:])))
+
+			}
+
+		}
+	}
+
+}
+```
+
+and store it in a variabke called new_cmd, and if you wanted to get fancier use a data structure. anyway lets move on, we then declare a switch statement, if hello is the beggining of the command that we picked up from our shell we will parse the values of the data structure `Message` with anything after the word hello, so say we said `hello jake` the variable of Data structure `Message` named `Name` will now be `jake` note when we do this and we trim the spaces this is still not okay, sure it seems fine and it can be considered safe code however when we use `t[6:]` we are telling the value to assign the variable a value after the length of `5` which means we are still assuming and trusting the user added `hello` which if they are playing around with the program most likely is not going to happen, try it yourself and see what happens if you go overboard and use a character of 100 characters ( i will talk about this later ), anyway after the variable `Access.Name` is set, the parser function will be called with all correct values 
 
 
