@@ -1293,7 +1293,51 @@ for port := 0; port < 65535; port++ {
 ```
 
 
-under that for loop it will attempt to connect to the host on that port, simply checking if the port works or is not being used, if it is being used it will be open, if not it will be closed. Programs like NMAP and MASSCAN will check for more data, try to probe the device for information, fingerprint and more. 
+under that for loop it will attempt to connect to the host on that port, simply checking if the port works or is not being used, if it is being used it will be open, if not it will be closed. Programs like NMAP and MASSCAN will check for more data, try to probe the device for information, fingerprint and more, we will not be getting into that right now however lets just build out scanner first. So this scanner will work in multiple ways, It will simply allow the user to run a program, specify a host, then specify a command they want to launch and wether thats scanning or whatever we excute it. Now note for this one we will still be assuming and trusting the user. As of writing i myself am currently experimenting with this method and maybe may even add it in here later on when i figure it out. However, you are completely free to brand the software and programs as your own AS LONG AS YOU MODIFY THE CODE, i will not come after you however i highly encourage if you want to re brand or re lable this software you experiment with the code and actually change it for the better.
+
+Lets head to the first step
+
+# Naming the program
+
+We always always want to come up with a unique name for this program especially if we are going to release it, this is a step you can skip its just extras for fun. So this script in summary is a scanning console that allows users to set an address and run commands for it. I think a good name for this script would be peak, peak because the script does not really look into hosts that deep however it gets a peak of information about the host. so lets add a cool banner
+
+**banner.txt**
+
+banner.txt will be where the banner is hidden, later on in the code we will use this file to be outputted as the ASCII banner. Typically i will not add huge banners to my script, if you want to you can choose to add just the banner art `peaked` as a ascii word or figlet version.
+
+```
+                                      ░░                            
+                                  ░░▓▓░░▒▒░░                        
+                                ▒▒░░░░░░░░░░░░▒▒                    
+                          ░░▒▒░░░░░░░░░░░░░░  ░░                    
+                        ▒▒  ░░░░░░░░░░░░  ░░░░▒▒                    
+                    ██░░░░░░░░░░░░░░░░░░░░░░░░▒▒                    
+                ██  ░░░░░░░░░░░░  ░░░░░░░░░░░░▒▒                    
+            ▒▒░░░░░░░░░░░░░░░░░░░░░░░░░░░░▒▒▒▒▓▓    ▓▓▓▓██          
+            ▒▒▒▒░░░░░░░░  ░░░░░░░░░░░░▒▒▒▒▒▒▓▓    ▓▓░░▒▒▓▓▓▓        
+              ▒▒▓▓▓▓▒▒░░░░░░░░░░░░▒▒▒▒░░▒▒▒▒░░▒▒  ░░░░░░▒▒▓▓        
+                ▓▓████▒▒░░░░░░▓▓░░░░▒▒▓▓▓▓▒▒▒▒▒▒░░░░░░▓▓▒▒▓▓        
+                ▓▓██████░░▒▒▒▒░░▓▓▒▒██▓▓▒▒▓▓▓▓▓▓▒▒▒▒      ░░        
+                  ▓▓▓▓██▒▒░░░░██    ▓▓▓▓▓▓▓▓██░░                    
+                    ██▒▒▒▒██          ▓▓                                                                                   
+[v1.0] peaked
+```
+
+anyway thats all that goes behind the name so lets move onto our F layout ( File layout )
+
+# Lay out 
+
+for this program we are going to make a small directory inside of our system called peaked 
+
+`mkdir peaked ; cd peaked`
+
+once in that directory 
+
+`mkdir modules ; touch main.go`
+
+then inside modules touch the following files 
+
+
 
 
 
