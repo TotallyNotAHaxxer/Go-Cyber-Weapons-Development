@@ -201,7 +201,7 @@ We introduce two new structures
 
 The first structure `User` has three fields, username and user age, username and user age are standard variables to that structure which means simply by defining a variable for that type like 
 
-```go
+```go						
 var v User
 ```
 
@@ -1325,17 +1325,14 @@ banner.txt will be where the banner is hidden, later on in the code we will use 
 
 anyway thats all that goes behind the name so lets move onto our F layout ( File layout )
 
-# Lay out 
+# Layout 
 
-for this program we are going to make a small directory inside of our system called peaked 
+The layout of this program remains simple, inside of a directory called moudles we will have two directories and three files, the two directories are called modules and XML, why XML? I will not be going over the code that is included in this file, since it is well over a thousand lines of code / data types. Remember how I explained further in this short book or tutorial we may be using advanced Data structures using things like XML? well yup this is the time. If you do not know a while back i wrote a program called red rabbit which is a cyber security framework which mashes a bunch of tools that were made from scratch together. In this framework i have a modules filepath which has another directory called XML in it, in the XML directory i have a file named `types.go` this file holds data structures for parsing a single XML file yes one XML file reuired a few thousand lines to parse, well the reason it is so big is it is parsing a large XML file which belongs to a computer company that has a record of every port, its description, its range and possible ports, along with its name and service type. We will be using this extreme data structure to parse this XML file and tell the user what service this exactly belongs to. We will be sorta mocking nmap by designing our own version of the service lookup for ports. 
 
-`mkdir peaked ; cd peaked`
 
-once in that directory 
+This filepath is WAYYYYYYYYYYYYYYYYYYYY to big to include here in this writing, so in the filepath examples of this repo you will see the tool named `peaked` which holds all the files that are used for this tool. 
 
-`mkdir modules ; touch main.go`
 
-then inside modules touch the following files 
 
 
 
