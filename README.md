@@ -1332,9 +1332,237 @@ The layout of this program remains simple, inside of a directory called moudles 
 
 This filepath is WAYYYYYYYYYYYYYYYYYYYY to big to include here in this writing, so in the filepath examples of this repo you will see the tool named `peaked` which holds all the files that are used for this tool. 
 
+here is the `peeked` file structure 
+
+```
+peeked
+|
+├── go.mod
+├── main.go
+├── modules
+│   ├── Console
+│   │   ├── Console.go
+│   │   └── Parser.go
+│   └── Functions
+│       ├── Auxilary.go
+│       ├── C.go
+│       ├── Port_Scanner.go
+│       └── Scanner_Thread.go
+└── XML
+    ├── Database.xml
+    ├── Types.go
+    └── xml.go
+```
+
+XML is the file path we will not be considered about, in fact the only thing we need to know is the import path. As said above the XML filepath is only there as a service / proto / information module about a given port. Another thing to note is that this code does not use a banner, so we will not be seeing any banners being used rather a simple console prompting a user to input and output.
+
+Before we continue fully, I will have you note this is a very intense tutorial, this is no tutorial for people who are new to go, it uses functions, threads, channels, and more advanced forms of go, I hope by now the 3 times I have said this it is now understood. Now lets move on
+
+
+The first code we will work on is in the filepath Functions. We need to create a directory that handles all the data, parses the input, parses and sets variables, and declares constants, most important of all runs the scanner and scans the host for ports so lets do that. First lets create the types, name a file in the directory `peaked/modules/Functions` named `C.go` and enter the following code 
+
+```go
+package Peeked
+
+type Console_Data struct {
+	Host    string
+	Verbose string
+}
+```
+
+Inside of the functions directory all files will be declared as `Peeked` the name of the project, the structure declares two variables. `Host` and `Verbose` both which are strings. Host will be used to define the host the user wants to scan and verbose will be wether or not the user wants output logging, such as all errors that happen between threads and the connections that error.
+
+
+Second lets create the file called `Auxilary.go` this file will handle all necessary enviroment based functions and settings so lets start with the following code 
+
+**full code to Auxilary.go**
+
+```go
+package Peeked
+
+import (
+	"fmt"
+)
+
+var C Console_Data
+
+func (Console_Import *Console_Data) Set_Aux_Host(host string) {
+	Console_Import.Host = host
+	fmt.Println("\n[+] Setting host -> ", host)
+}
+
+func (Console_Import *Console_Data) Set_Aux_Verbosity(verbose string) {
+	Console_Import.Verbose = verbose
+	fmt.Println("\n[+] Setting Verbose -> ", verbose)
+}
+
+func (Console_Import *Console_Data) Settings() {
+	fmt.Println("[--------- Config: Hostname -> ", Console_Import.Host)
+	fmt.Println("[--------- Config: Verbose  -> ", Console_Import.Verbose)
+}
+
+func (Console_Import *Console_Data) Clear() {
+	fmt.Println("\x1b[H\x1b[2J\x1b[3J")
+}
+```
+
+We define functions with structure tags, we went over this for a second at the very top when getting currencies based on the user parsed in the data structure. We define all functions with the structure tag named `Console_Import` with the pointer to the data structure `*Console_Data` this is to allow the functions and the files within this filepath `peeked/modules/Functions` to communicate with each other, share variables, types, and functions. We use the term `Console_Import` as a reach variable for the functions, instead of a single variable being declared to reach the data structure we can spread it among functions to allow again for them to be called using that same structure pointer.
+
+Later on we will use this to run the functions in the maps that we will use. 
+
+The first functions `Set_Aux_Host` will set the hostname to the session, same with `Set_Aux_Verbosity` this will set wether or not the user wants a value thats true or false for verbosity. If the user does not want verbosity at all they will not need to set this, since later on we only look for the string value `true`.
+
+Lets now move onto the last two files of this directory, the port scanner that actually dials the host on a given port, and the threaded function which is the reason to start the threads. We first create a filename called `Scan_Addr` this function will be responsible for parsing the values from the set host with the port that it ranges under so here is the structure of the function 
+
+```go
+func (Console_Import *Console_Data)Scan_Addr(p, r chan int)
+```
+
+first like before we define the `Console_Import` structure pointer then we define the name, finally defining the arguments, the arguments for this will all be of the same type `chan int` is a channel that sends only integer based data. Which is exactly what we will be sending, the first argument `p` will stand for `ports` meaning under a thread we will be sending a integer that represents a port to the channle, the last argument `r` is a channle that will send results, meaning any port that is open or closed will be sent as a result to the integer based channle.
+
+we then run a for loop
+
+`for l := range p`
+
+the L variable is every value in range for every port we send to the channle, later on this channle will have all 65,000+ ports. 
+
+then we conver the integer to a string using 
+
+`v := strconv.Itoa(l)`
+
+converting the value of l into a string for later parsing, where the result of that conversion will be held in the variable v
+
+we move on by naming a function with two variables 
+
+`conn` and `err` 
+
+conn is the value we will use to connect and dial the address with the port sent to the channle. like this 
+
+`		conn, err := net.Dial("tcp", net.JoinHostPort(Console_Import.Host, v))`
+
+a cool thing about go is in golang's net module you have a function called `JoinHostPort` which allows you to take two values a hostname and a port and auto join them without having to use Sprintf or some function which will format the string. we use the `Console_Import` tag to define `.Host` or the host that will be set by the user later on in the console.
+
+we check for an error simply by saying `if err != nil` if it does not equal nil or empty then we know a connection has failed, which we can choose to print or continue depending on the user, if they have verbosity set as true 
+
+```go
+		if err != nil {
+			if Console_Import.Verbose == "true" {
+				fmt.Println(err)
+			}
+			r <- 0
+			continue
+		}
+```
+
+`r <- 0` means that we set the result to 0, or false, meaning the port was NOT open. and continue, and if else then we use `conn.Close()` to close the connection, and `r <- l` to send the port to the channle telling us the port is open, here is the finished brick of code 
+
+**full code to Port_Scanner.go**
+
+```go
+package Peeked
+
+import (
+	"fmt"
+	"net"
+	"strconv"
+)
+
+// port scanner for the host
+func (Console_Import *Console_Data)Scan_Addr(p, r chan int) {
+	for l := range p {
+		v := strconv.Itoa(l)
+		conn, err := net.Dial("tcp", net.JoinHostPort(Console_Import.Host, v))
+		if err != nil {
+			if Console_Import.Verbose == "true" {
+				fmt.Println(err)
+			}
+			r <- 0
+			continue
+		}
+		conn.Close()
+		r <- l
+	}
+}
+```
+
+
+as you can see this is quite simple, we now have to move onto the threading function, so in the file directory `modules/Functions` create a file called `Scanner_Thread.go` keep in mind by now we should have the following files 
+
+```
+modules/Functions/C.go
+modules/Functions/Auxilary.go
+modules/Functions/Port_Scanner.go
+modules/Functions/Scanner_Thread.go
+```
+
+and again if you are lost and can not follow along in this repo there are all the tools listed along with their example numbers, peeked is number 1 under `Example_1_Peeked` this is quite a large begginer introduction script to this article / book, so it is not expected for every single person to follow along especially if you are just now entering the relm of go!
+
+
+**Scanner_Thread.go**
+
+This one is quite longer than most of the files we have covered so far, but no time to fear! 
+
+```go
+package Peeked
+
+import (
+	"fmt"
+	XML "main/XML"
+	"strconv"
+)
+
+func (Console_Import *Console_Data) Thread_Call() {
+	pt := make(chan int, 65535)
+	re := make(chan int)
+	var open []int
+	for o := 0; o < cap(pt); o++ {
+		go Console_Import.Scan_Addr(pt, re)
+	}
+	go func() {
+		for k := 1; k <= 1024; k++ {
+			pt <- k
+		}
+	}()
+
+	for p := 0; p < 1024; p++ {
+		pts := <-re
+		if pts != 0 {
+			open = append(open, pts)
+			port := strconv.Itoa(pts)
+
+			XML.Find_and_Search("XML/Database.xml", port)
+		}
+	}
+	fmt.Println("All open ports - ")
+	for _, k := range open {
+		fmt.Printf("\t[%v] \t %v\n", len(open), k)
+	}
+
+}
+```
+
+this file is first defined as `Thread_Call()` which accepts no arguments, simply because as discussed before the function will pull data and needed information from the structure tags `Console_Import`, the port numbers to scan and send to the channle's in `Port_Scanner.go` which will be all ports from 0 to 65535 using the called function `pt := make(chan int, 65535)`
+
+lets discuss the top part 
+
+```go
+	pt := make(chan int, 65535)
+	re := make(chan int)
+	var open []int
+	for o := 0; o < cap(pt); o++ {
+		go Console_Import.Scan_Addr(pt, re)
+	}
+	go func() {
+		for k := 1; k <= 1024; k++ {
+			pt <- k
+		}
+	}()
+```
+
+the PT variable is the channle that will send the data to the port scanner, aka the ports to scan and parse with the host, the RE variable is another channle that has its own channle which is where the results will be sent to aka all the open ports NOT THE CLOSED PORTS.
 
 
 
 
-
+ 
 
