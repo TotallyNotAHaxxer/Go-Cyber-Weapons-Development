@@ -1857,3 +1857,4 @@ Port - 22
 
 ```
 
+**YAYYYYYYYYYYYYYYYYYYYYYYYYYYY** if you have been following along and understood some things about this program good on you! You have just made it past the first section of this tutorial which is building a simple scanner using Go and its very very robust functions! keep going in this field, its hard out here sometimes, it can get frustrating and overwhelming but dont worry we all and i mean ALL were there, i even have those days today!
