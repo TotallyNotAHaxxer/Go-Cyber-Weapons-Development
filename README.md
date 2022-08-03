@@ -1553,7 +1553,7 @@ lets discuss the top part
 		go Console_Import.Scan_Addr(pt, re)
 	}
 	go func() {
-		for k := 1; k <= 1024; k++ {
+		for k := 1; k <= 65535; k++ {
 			pt <- k
 		}
 	}()
@@ -1561,8 +1561,299 @@ lets discuss the top part
 
 the PT variable is the channle that will send the data to the port scanner, aka the ports to scan and parse with the host, the RE variable is another channle that has its own channle which is where the results will be sent to aka all the open ports NOT THE CLOSED PORTS.
 
+then we create afor loop `for o := 0; o < cap(pt); o++` this for loop will start the thread on the port scanner for the function, and for the amount of possible values that can be held in that channle `pt` we scan for the given port. We then use the `go func()` which in the simplist terms the go func keyword is a threaded anonymous function, anon functions are functions that are not seen by any other function or run by any other function other than the one it is in which in out case is `Thread_Call`. We then under that thread prun a for loop which defines that for k is equal to 1, k is less than or equal to the number of all possible ports `65535` add that port to the channle `pt`, the for loop keeps on adding numbers to K or in this case ports as K's value, then we send it to the channle of `pt` by using `<-`.
+
+We move onto our final brick of code in that function which is the middle part 
+
+```go
+	b := XML.Opener("XML/Database.xml")
+	for p := 0; p < 65535; p++ {
+		pts := <-re
+		if pts != 0 {
+			open = append(open, pts)
+			port := strconv.Itoa(pts)
+			XML.Find_and_Search("XML/Database.xml", port, b)
+		}
+	}
+```
+
+You first start by declaring the byte to be parsed and scanned by running the results of opening and parsing the XML database file, then under anopther for loop declare another one that runs until the variable `p` is NOT less than `65535` and parses the data for each result under the data that is being sent to the results channle. We get the output or result from the results channle by specifying a variable name named `pts ( stands for ports )` following `<-re` using the `<-` tells the program to pass the value that was appended to the results channle or sent to the results channle and assign it to the value `pts`, then we finally check if pts was 0, if it was to skip it and move on, this prevents further errors in our code we can have down the road. We use the `open = append(open, pts)` to append the open ports we got from the channle to that integer based array we declared up top. Fin ally ending with converting the `pts` of type int to a string so we can search for it in the database. 
+
+We end this code by declaring the following 
+
+```go
+
+	fmt.Println("All open ports - ")
+	for _, k := range open {
+		fmt.Printf("\t[%v] \t %v\n", len(open), k)
+	}
+```
+
+this is simple code, simply print a message saying all open ports, continue to make a for loop under the integer array `open` and output the results. In a scenario where we were to run this without the console in a main.go file by setting the variables and what not we would get an output similar to the following if we set the host to `www.scanme.org` 
+
+```go
+
+Port - 22 
+             | tcp 	| 22   	| ssh
+             | udp 	| 22   	| ssh
+             | sctp 	| 22   	| ssh
+
+Port - 80 
+             | tcp 	| 80   	| http
+             | udp 	| 80   	| http
+             | tcp 	| 80   	| www
+             | udp 	| 80   	| www
+             | tcp 	| 80   	| www-http
+             | udp 	| 80   	| www-http
+             | sctp 	| 80   	| http
+
+All open ports - 
+	[2] 	 22
+	[2] 	 80
+```
+
+you can already see how we can make the frontend of this better, however lets move onto more of a backend when parsing the commands rather than output, cause remember the main focus of us developing programs that use threads, and advanced functions is to make sure our code is fast, reliable, structured well, and is secure for the end user using our program.
+
+**NOTE** 
+
+WE ARE NOW IN THE FILEPATH `modules/Console` the full path of this project being `peeked/modules/Console` the import for the go script being `main/modules/Console`
+
+in our Console filepath create the following files `Console.go Parser.go` using something like touch once done hop into `Parser.go` note that this file will be the reason for running and parsing functions and outputting the results. 
+
+The following code is in the `Parser.go` file
+
+```go
+package Peeked
+
+import Outbound_Functions "main/modules/Functions"
+
+var dt Outbound_Functions.Console_Data
+
+var Func_map = map[string]interface{}{
+	"host": dt.Set_Aux_Host,
+	"verb": dt.Set_Aux_Verbosity,
+}
+
+var Console_Map = map[string]interface{}{
+	"settings": dt.Settings,
+	"clear":    dt.Clear,
+}
+
+var Script_Map = map[string]interface{}{
+	"scan": dt.Thread_Call,
+}
+```
 
 
+we first define this package name as `Peeked` then we import the Functions filepath, or the filepath we jsut got finished working on and declare its caller as `Outbound_Functions` this will be used in the code below 
 
+`var dt Outbound_Functions.Console_Data` 
+
+to reach the data structure `Console_Data`
+
+then we do what we did before a while back but kinda abuse it, we define our first map which will be our `set` module, the `set` module will be used by the user to set current session data like the hostname and if they want verbose logging, this map like every other map in this tutorial in order to run a function will have the structure `[string]interface{}` we start this off by first declaring our idea of what the user should run. say the user wants to set the host they will use 
+
+`set host 127.0.0.1` 
+
+the the `Func_Map` will be there to run the function as shown here 
+
+```go
+	"host": dt.Set_Aux_Host,
+	"verb": dt.Set_Aux_Verbosity,
+```
+
+dt is calling the data structure to call the functions from the Functions module path we made, this map will simply take a value after the user uses `set` and scans for a 4 letter word if it is neither `verb` nor `host` it will exit and return nil or a empty command for that module. I know i am kind of over describing it but you get the point. We do this same thing for the rest of the other two maps.
+
+Despite them all doing the same they are called different ways by the user, for example the `Func_Map` will be called when the users first argument to the console is `set` if the argument to the console is something like `script` then the map `Script_Map` will be used to scan our host, and if the word `console` is picked up by the user the map that will be chosen by the program will be `Console_Map`.
+
+This is pretty simple nothing new as we have gone over this before multiple times with the introduction to maps and robust code in the beggining of this chapter. 
+
+ Lets finish this program off shall we? Let us now hop into the file `Console.go` and load the following code in it
+
+
+```go
+package Peeked
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+)
+
+func Handle(ch chan os.Signal) {
+	signal.Notify(ch, os.Interrupt)
+	for k := <-ch; ; k = <-ch {
+		switch k {
+		case os.Interrupt:
+			fmt.Println("[+] Killing process and exiting")
+			os.Exit(0)
+		case os.Kill:
+			fmt.Println("[*] Recived a signal to kill the program, exiting")
+			os.Exit(0)
+		}
+	}
+}
+
+func Run() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Peeked> ")
+		t, _ := reader.ReadString('\n')
+		t = strings.Replace(t, "\n", "", -1)
+		go Handle(make(chan os.Signal, 1))
+		if strings.Compare(t[0:3], "set") == 0 {
+			cmd := string(strings.TrimSpace(t[4:8]))
+			val := string(strings.TrimSpace(t[8:]))
+			ft := Func_map[cmd]
+			ft.(func(string))(val)
+		}
+		if strings.Compare(t[0:7], "console") == 0 {
+			cmd := string(strings.TrimSpace(t[7:]))
+			ft := Console_Map[cmd]
+			if ft != nil {
+				c := ft.(func())
+				c()
+			}
+		}
+		if strings.Compare(t[0:6], "script") == 0 {
+			ft := Script_Map[string(strings.TrimSpace(t[6:]))]
+			if ft != nil {
+				c := ft.(func())
+				c()
+			}
+		}
+	}
+}
+```
+
+
+This code seems scary but trust me its not, sure its a bit more robust but its really not that hard to explain, i imagine by now you know what the top portion of the code means, that includes the function `Handle` and up, since we also discussed the use of that function before entering this section.
+
+Our main function to run the console will be named `Run`, this function will be the power behind everything, this is what makes our program and is the building block for everything. Under the function `Run` we declare a variable named reader which calls the bufio package to create a new reader that will constantly read user based input, this is initialized when we run the for loop below the variable name `reader`, we then print a simple message 
+
+`fmt.Print("Peeked> ")`
+
+this is here for style so the user is not left will a blank input thinking the program is frozen, and without starting a new line with `\n` we can ensure the user will be on that line entering commands. Anyway we will use t as our value for the reader to call a function called `ReadString`. This function allows you to read a string or in our case a user input until what character or whatever we want, in this case we use the `\n` to detect when the user starts a new line or hits enter on their keyboard, once the program parses the value of t and the user input it will replace the values using a simple strings.replace value of t, any value that is a new line will be cut and not parsed as a command.\
+
+We then call the CTRL+C function under a thread 
+
+
+```go
+		go Handle(make(chan os.Signal, 1))
+
+```
+
+
+and use a simple strings.compare function to detect what module the user first stated when entering a command, like so 
+
+```go
+		if strings.Compare(t[0:3], "set") == 0 {}
+
+```
+
+the if statement expects the user to have inputted `set` simply using a slice like `t[0:3]` if the users command was not set and was not a length of 3 it will continue however if it WAS then we do the following 
+
+```go
+			cmd := string(strings.TrimSpace(t[4:8]))
+			val := string(strings.TrimSpace(t[8:]))
+			ft := Func_map[cmd]
+			ft.(func(string))(val)
+```
  
+ 
+We first declare a variable named cmd, this makes sure our user input is a string, and any spaces within the 4 to 8 length is cut and eliminated from the command, this ensures what the user was inputting was correct however this can still be a wrong command if it is not the length the program expects. then we define `val` which defines a value of the function, since this is the module set we are loading we want to make sure the user gets to set their entire variable, and for that we do simple head math and parse a string, and trim the space for every value after the `t[8:]` mark, if you specify an array with `[num:]` where num is an integer and print that value it will print everything after it which is what we do here. Then we use `ft` to parse the command into our map and store the result of the map into the value finally calling the function returned from the map like `ft.(func(srtring))(val)` all this does is init the variable ft, then tells the program that any function returned from that map must have 1 single value and that is the value the user wants to set, for example our console will work like this 
+
+user will make command like `set host 127.0.0.1`
+
+if set is a true value in the console as a module it will parse, then it will throw the second value which is in this situation `host` into the map, and run the function to parse and assign any value after host as a string value to the data strutcure. 
+
+what about commands without arguments? well thats what we are going to define here, in this program we have 3 total modules `set, console, and script` script has a command to scan the host, console has a command to clear the terminal or output settings, and set well has two commands which allow you to set two values this script uses to conduct the scan.
+
+```go
+		if strings.Compare(t[0:7], "console") == 0 {
+			cmd := string(strings.TrimSpace(t[7:]))
+			ft := Console_Map[cmd]
+			if ft != nil {
+				c := ft.(func())
+				c()
+			}
+		}
+```
+
+
+Note when looking for strings using slices they must be the same length of the word or it wont work, for example here console is 7 characters long so we need to index the string from 0 to 7 as mentioned above. After we check that the value is true or not we simply trim the space for the command after anything of length 7, console has a length of 7 so we will run any command after the word console or rather seen here 
+
+`			cmd := string(strings.TrimSpace(t[7:]))`
+
+we do the same thing as before assign the output of the map to a variable named ft, check if the map returned nil and if it did do not run the command, `this means the command was not found in the map`, and declare ft as a `func` without any values and run it by just calling `c`
+
+the same thing happens here when calling the script module to scan 
+
+```go
+		if strings.Compare(t[0:6], "script") == 0 {
+			ft := Script_Map[string(strings.TrimSpace(t[6:]))]
+			if ft != nil {
+				c := ft.(func())
+				c()
+			}
+		}
+```
+
+here we do the same, length of script is 6 so we index the string from 0 to 6, if the value is true trim the space and parse it into the map, anything after 6 is considered a command to that given module which will be parsed, if the map returns without a function then do nothing, if it does then execute the scan.
+
+
+I know what you are going to say **This was super SUPER rushed** yeah there is a reason for that, by now you should know the basics of how this all works, this console was just simply throwing everything we learned before together based on user input.
+
+lets migrate out of the modules filepath and just create a file named `main.go`, main.go will have no complex code in it but it is still required, here is the code we will use to call all other functions together
+
+**main.go**
+
+```go
+package main
+
+import Console_Utils "main/modules/Console"
+
+func main() {
+	Console_Utils.Run()
+}
+
+```
+
+thats it :> im not joking that is seriously it, all we do is import the Console files from the modules filepath, and call the main console which is defined as `Run` As we made it before.
+
+here is an example of what the script might look like on your end, i did a small demo here
+
+```
+Peeked> set host www.scanme.org
+
+[+] Setting host ->  www.scanme.org
+
+Peeked> set verb false  
+
+[+] Setting Verbose ->  false
+
+Peeked> console settings
+
+[--------- Config: Hostname ->  www.scanme.org
+[--------- Config: Verbose  ->  false
+
+Peeked> script scan
+
+Port - 80 
+             | tcp 	| 80   	| http
+             | udp 	| 80   	| http
+             | tcp 	| 80   	| www
+             | udp 	| 80   	| www
+             | tcp 	| 80   	| www-http
+             | udp 	| 80   	| www-http
+             | sctp 	| 80   	| http
+
+Port - 22 
+             | tcp 	| 22   	| ssh
+             | udp 	| 22   	| ssh
+             | sctp 	| 22   	| ssh
+
+```
 
