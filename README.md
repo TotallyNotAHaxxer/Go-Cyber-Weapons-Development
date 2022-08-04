@@ -1971,3 +1971,4 @@ This is simple to do and we will see this when we impliment it into our project 
 
 This project i decided to name `Carl` for no reason, you know those lamas from youtube? the one that always murders other lamas, well there you go, for reference im naming it after the lama below 
 
+![Carl](desktop_54a5bee2-c76d-4fa4-987b-ba9768231a79.jpeg)
