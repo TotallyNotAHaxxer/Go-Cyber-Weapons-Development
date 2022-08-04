@@ -1876,5 +1876,91 @@ I am quite sure by now you know what a DNS record is, if you don't here is a sho
 
 We want to create a program similar to dig, something that can get MX records, NS records, TXT records and other records alike. So this also means that we will be using flags or command line switches rather than a console to interact with information in the script. Command line switches are basically modifiers for a program to specify certian data. Typically command line swicthes will look like `-a` these are also known as `flags`. We want the user to specify what they want to grab, like general data, MX, NS, A, TXT, Headers, IP, Server, etc so the quickest way to do this is use flags and exit the program so the user can reload the program for more data, we might also want to format this a bit more so the user may be able to catch important data.
 
+when someone runs our program with the flags they will run it something like this as the idea 
+
+`./main --domain example.com --rec="mx" `
+
+we will be allowing users to get the following 
+
+`MX/TXT/A/AAAA/CNAME/PTR/NS/SRV/SERVER/HEAD`
+
+this script will be pretty simply to make no where as near as advanced as the one above is, the cool part about this is we will also allow users to set text files of hosts/domains, and even allow an export of the data in JSON format for the `*` option, the `*` option when specifying the flag `--rec` will allow the user to get all forms of records.
+
+#### Templates ####
+
+In some cases you may find yourself formatting your own output files or generating your own files, Typically if the file is short you will only be using inline templates to specify the data and format it, just use a variable to define the file structure and use `%s` or whatever formatting key you want to use to format the variables to the file. Typically templates are pre generated sets of code formatted and sent into a file, there are multiple ways to do this in go, for HTML you can use golangs standard HTML template library to use `.tmpl` files to copy the data and format it. However we will not be using that given our main focus is JSON based output
+
+Now we could pre declare the templates like 
+
+```go
+var Template = '
+[
+	"Domain info": {
+		{
+		 "Domain name": "%s",
+		 "Domain IPA": "%s"
+		}
+	}
+]
+'
+```
+ 
+ or we can use data types like this 
+ 
+ ```go
+package main
+
+import (
+	"encoding/json"
+	"io/ioutil"
+)
+
+type Info struct {
+	MX, NS, A, AAAA string
+}
+
+type Domain struct {
+	Domain_Name, URL, Extension string
+	DNS_Information             []Info
+}
+
+func main() {
+	data := Domain{
+		Domain_Name: "www.example.com",
+		URL:         "https://www.example.com",
+		Extension:   ".com",
+		DNS_Information: []Info{
+			Info{
+				MX:   "x",
+				NS:   "z",
+				A:    "x",
+				AAAA: "s",
+			},
+		},
+	}
+
+	file, _ := json.MarshalIndent(data, "", " ")
+
+	_ = ioutil.WriteFile("Output.json", file, 0644)
+}
+
+ ```
+ 
+ this will produce the following output file once the values are set
 
 
+```json
+{
+ "Domain_Name": "www.example.com",
+ "URL": "https://www.example.com",
+ "Extension": ".com",
+ "DNS_Information": [
+  {
+   "MX": "x",
+   "NS": "z",
+   "A": "x",
+   "AAAA": "s"
+  }
+ ]
+}
+```
