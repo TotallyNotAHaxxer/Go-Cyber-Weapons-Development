@@ -1982,14 +1982,318 @@ This project i decided to name `Carl` for no reason, you know those lamas from y
 ├── main.go
 └── Modules
     ├── Banner
-    │   ├── Banner.go
-    │   └── Banner.txt
+    │   ├── Banner.go
+    │   └── Banner.txt
     ├── DNS
-    │   ├── Functions.go
-    │   └── Types.go
-    ├── JSON
-    │   ├── Loader.go
-    │   └── Output.go
+    │   ├── Functions.go
+    │   ├── Parser.go
+    │   └── Types.go
     └── Options
         └── Opts.go
+
+4 directories, 9 files
 ```
+
+for now lets leave the following files alone `go.mod, go.sum, main.go`
+
+lets hop into the modules directory and start with `Banner.go`
+
+this is a simple file which will open up `Banner.txt` and output the banner like so 
+
+```go
+package Carl_Banner
+
+import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+)
+
+var Banner = "Modules/Banner/Banner.txt"
+
+func Out() {
+	f, x := os.Open(Banner)
+	if x != nil {
+		log.Fatal(x)
+	} else {
+		defer f.Close()
+		scanner := bufio.NewScanner(f)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+	}
+}
+```
+
+This is nothing that needs to be explained harshly, all we do is simplify the path of the banner, open the file, check if there is an error, close the file, open a scanner, and for every line the scanner scans in the file it will output the text that the scanner finds in the file.
+
+**Contents of Banner.txt**
+
+```
+                    ____ ____ ____ _    /
+                    |___ |--| |--< |___. 
+                        Carl - V 1.0
+```
+
+thats it, nothing to big, nothing too small and nothing too nice.
+
+lets now move out of the `Banner` directory and actually write our functions.
+
+the first file we will look at is in `Modules/DNS` which is named `Types.go` inside of `Types.go` is the following 
+
+```go
+package Carl_DNS
+
+type Carl_Data struct {
+	Domain_Name string
+	Record      string
+	Filepath    string
+}
+
+```
+
+a simple type to describe the settings the user set via flags, Carl_Data will be the type we use and allow functions to use in order to make requests via domain name without having to run the functions with variables, Quite simple to understand correct? Lets now move on
+
+in the filepath `Modules/DNS` the second file we will look at is named `Functions.go` this is a function file which will run everything, making requests, loading data structures with variables, outputting and formating data, etc. I will split this file in three parts, the first part which is all of our imports and our types, the second part will be half of the functions in the file, and the last part which will be generating and formating JSON output.
+
+**FIRST HALF OF THE FILE Modules/DNS/Functions.go**
+
+```go
+package Carl_DNS
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
+	"strings"
+)
+
+type DNS_Record struct {
+	MX             []*net.MX
+	NS             []string
+	A              []net.IP
+	TXT            []string
+	CNAME          string
+	PTR            []string
+	SERVER         string
+	STATUS         string
+	METHOD         string
+	Expires        string
+	X_frame_opts   string
+	Date           string
+	Content_Len    string
+	Cache_Control  string
+	Set_Cookie     string
+	SRV_CNAME_BASE string
+	SRV_Target     []string
+	SRV_Port       []uint16
+	SRV_Priority   []uint16
+	SRV_Weight     []uint16
+}
+
+
+var S DNS_Record
+var IPs []net.IP
+```
+ 
+so if it was not clear enough our package name we will call data with from other files will be `Carl_DNS` just simply naming the project name, then the purpose of the file which is to init DNS requests and automate output. Firstly we define a data structure called `DNS_Record` this structure will be responsible for holding all of the following information 
+
+```
+Name servers   (NS)
+Mail Exchange  (MX)
+IP Records     (A/AAAA)
+TEXT Records   (TXT)
+Canonical Name (CNAME)
+Pointer Record (PTR)
+Domain Server  (SERVER)
+Request status (STATUS)
+Request method (METHOD)
+TTL            (EXPIRES)
+X-Frame_Option (X_frame_Opts)
+Date           (Date)
+Content length (Content_Len)
+```
+
+you get the gist of it, if you know about DNS records and what not it should be simple to understand
+
+we then use the following variables 
+
+```go
+var S DNS_Record
+var IPs []net.IP
+```
+
+to define our structure init variable `S` to init `DNS_Record` and `IPs` to define a `net.IP` array, the array will be used here shortly
+
+**SECOND HALF OF Modules/DNS/Functions.go**
+
+
+```go
+
+// grab A-AAAA records (IPv4 / IPv6)
+func (Config *Carl_Data) A() {
+	r, x := net.LookupIP(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup the A and AAAA records of the domain -> ", x)
+	} else {
+		for _, A := range r {
+			IPs = append(IPs, A)
+		}
+		S.A = IPs
+	}
+}
+
+// CNAME
+func (Config *Carl_Data) CNAME() {
+	r, x := net.LookupCNAME(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup CNAME records of the domain -> ", x)
+	}
+	S.CNAME = r
+}
+
+// PTR
+
+func (Config *Carl_Data) PTR() {
+	for _, Q := range S.A {
+		v := fmt.Sprint(Q)
+		p, x := net.LookupAddr(v)
+		if x != nil {
+			fmt.Println("[>>] CARL    ::: Log - Could not lookup the PTR records for the domain -> ", x)
+		} else {
+			for _, l := range p {
+				S.PTR = append(S.PTR, l)
+			}
+		}
+	}
+}
+
+// NS
+func (Config *Carl_Data) NS() {
+	ns, x := net.LookupNS(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup name server for the domain -> ", ns)
+	} else {
+		for _, n := range ns {
+			a := fmt.Sprint(n)
+			S.NS = append(S.NS, strings.Trim(a, "&{}."))
+		}
+	}
+}
+
+// MX
+func (Config *Carl_Data) MX() {
+	mx, x := net.LookupMX(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup MX records for the domain -> ", x)
+	}
+	for _, m := range mx {
+		S.MX = append(S.MX, m)
+	}
+}
+
+// TXT
+func (Config *Carl_Data) TXT() {
+	txt, x := net.LookupTXT(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup TXT records for the domain -> ", x)
+	}
+	for _, t := range txt {
+		S.TXT = append(S.TXT, t)
+	}
+}
+
+```
+
+this seems pretty easy, lukily for us go has a amazing library called `net` that is standard with the language, the net library allows us to make DNS info requests to a given domain name, we can lookup all of the following data with the package
+
+```
+SRV
+MX 
+NS
+A
+AAAA
+TXT
+PTR
+CNAME
+HEADER
+```
+
+go makes this simple and easy to do, all it is is simply just automating the values we get from the response and initilizing the structures.
+
+lets start simple and grab the `A` records
+
+```go
+func (Config *Carl_Data) A() {
+	r, x := net.LookupIP(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup the A and AAAA records of the domain -> ", x)
+	} else {
+		for _, A := range r {
+			IPs = append(IPs, A)
+		}
+		S.A = IPs
+	}
+}
+```
+
+You will notice alot of data formating in alot of different weird ways like the following 
+
+```go
+strings.Trim(fmt.Sprint(f.Header.Values("date")), "[]")
+```
+
+anyway the function `A()` simply gets the `A/AAAA` records of a DNS, in order to do this all we do is simply define two variables `r` and `x`, x will always in my book be reserved for errors, but all you need to know is where this variables placement in it no matter what letter or word or phrase it is will always be an error ( in this situation ), `r` is the variable where all of the values from `net.LookupIP` will be. When we define net.LookupIP we make sure the domain name is fully converted to a string before sending it off, we then check for an error, if there is none we make a for loop
+
+```go
+		for _, A := range r {
+			IPs = append(IPs, A)
+		}
+```
+
+the for loop uses the variable `IPs` and appends data to it, the data that is being appended to the array `IPs` is the values we stored in `r` from the `net.LookupIP` function, that is if there is no error in that.
+
+then we use `S` to define `A` which `S.A` is our `A` records value for the data structure `DNS_Record`, there will be no message that is ran, at all simply just it finishes and moves on.
+
+**CNAME FUNCTION**
+
+```go
+func (Config *Carl_Data) CNAME() {
+	r, x := net.LookupCNAME(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup CNAME records of the domain -> ", x)
+	}
+	S.CNAME = r
+}
+```
+
+this is simple, you should understand this, if you dont all it does is calls the `net` package and runs `LookupCNAME` which with a given domain will lookup the CNAME of the domain, and assign it into the data structure.
+
+**PTR FUNCTION**
+
+```go
+func (Config *Carl_Data) PTR() {
+	Config.A()
+	for _, Q := range S.A {
+		v := fmt.Sprint(Q)
+		p, x := net.LookupAddr(v)
+		if x != nil {
+			fmt.Println("[>>] CARL    ::: Log - Could not lookup the PTR records for the domain -> ", x)
+		} else {
+			for _, l := range p {
+				S.PTR = append(S.PTR, l)
+			}
+		}
+	}
+}
+
+```
+
+this one is a tiny bit different but not by much, first we make sure we call the `A()` function, this is simply because we need to ensure that we get an IP of the domain to lookup, which in our case all we do is call the function, once it has run and finished we start a for loop to say for every IP address with the variable `Q` format it using `fmt.Sprintf(Q)`, lookup the address and pass the values to `v` if there is no error then start another range statement which tells us for every value in `p` send the values to `l` and append it to the PTR array in the structure.
+
+**NameServer Function**
+
