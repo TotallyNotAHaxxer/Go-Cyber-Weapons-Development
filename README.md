@@ -3056,6 +3056,7 @@ else {
 				Carl.Head()
 				Carl.SRV()
 				Carl.Generate()
+				fmt.Printf("File [ %s ] Has been generated\n\n", Carl.Filepath)
 			}
 ```
 
@@ -3066,4 +3067,126 @@ if user specifed output continue, if else exit, if user made an output flag or `
 **CONCLUSION AND FINAL WORD**
 
 This concludes this current section, we have just fully created our first ideal remake of dig, no this is not 100% like dig not even close in terms of output but it introduced you to the go `net` package and using data types in functions even in advanced scenarios, this is clearly not as advanced as the program before but that was the goal, now lets use this.
+
+im going to run the following options on `scanme.org`
+
+
+```
+*
+head
+server
+```
+
+## USING THE * OPTION ##
+
+
+FIRST EXAMPLE USING `*` note the only thing that will output at the end of this is `file so and so has been generated`
+
+**command**
+
+```
+go run main.go -o --filepath="scanme.json" --domain="scanme.com" -r="*"
+```
+
+**output**
+
+```
+                    ____ ____ ____ _    /
+                    |___ |--| |--< |___. 
+                        Carl - V 1.0
+
+
+[>>] CARL    ::: Log - Could not lookup MX records for the domain ->  lookup scanme.com on 75.75.75.75:53: no such host
+[>>] CARL    ::: Log - Could not lookup TXT records for the domain ->  lookup scanme.com on 75.75.75.75:53: no such host
+[>>] CARL   :: Could not get the SRv records from the server, got error ->  lookup _xmpp-server._tcp.scanme.com on 75.75.75.75:53: no such host
+File [ scanme.json ] Has been generated
+```
+
+as you can see we got a few errors, we could not load the MX or TXT records, this is fine this is not a script issue just some domains you can not actually lookup the MX and TXT records as there may not be any to find 
+
+**JSON FILE OUTPUT**
+
+```go
+{
+ "MX": null,
+ "NS": [
+  "ns-1327.awsdns-37.org",
+  "ns-1568.awsdns-04.co.uk",
+  "ns-47.awsdns-05.com",
+  "ns-749.awsdns-29.net"
+ ],
+ "A": [
+  "54.229.140.24",
+  "54.229.140.24"
+ ],
+ "TXT": null,
+ "CNAME": "scanme.com.",
+ "PTR": [
+  "ec2-54-229-140-24.eu-west-1.compute.amazonaws.com.",
+  "ec2-54-229-140-24.eu-west-1.compute.amazonaws.com."
+ ],
+ "SERVER": "nginx/1.10.3 (Ubuntu)",
+ "STATUS": "200 OK",
+ "METHOD": "GET",
+ "Expires": "",
+ "X_frame_opts": "SAMEORIGIN",
+ "Date": "Mon, 08 Aug 2022 00:48:27 GMT",
+ "Content_Len": "-1",
+ "Cache_Control": "max-age=0, private, must-revalidate",
+ "Set_Cookie": "_scanme_shell_session=9B4lPe7gtAPZij6SCi6xipmrLkVWYSOEbTxAyq%2FHdRIRxIM2miKhaR4qiHognh3i4J6xj4rbdm5h3eykGhTfLypo0col5fH%2FM4Fc3ektIYKojzH4%2Fg2CRVwg0RbWRgz1mBBtJoREAez6yDc61xE%3D--ONZ1KiBvtc1jTmPg--%2BUYQ%2BSA4RQ66nWPzEpf4eA%3D%3D; path=/; HttpOnly",
+ "SRV_CNAME_BASE": "",
+ "SRV_Target": null,
+ "SRV_Port": null,
+ "SRV_Priority": null,
+ "SRV_Weight": null
+}
+```
+
+as you can see we still got information of th server and the PTR's and what not saved in a JSON file, you have sucessfully scanned using your first scaning program! YAY! 
+
+lets use other options 
+
+## USING THE SERVER OPTION ##
+
+**command**
+
+```
+go run main.go --domain="scanme.org" -r="server"
+```
+
+**output**
+
+```
+                    ____ ____ ____ _    /
+                    |___ |--| |--< |___. 
+                        Carl - V 1.0
+
+
+Server ->  nginx/1.10.3 (Ubuntu)
+```
+
+## USING THE HED OPTION ##
+
+**command** 
+
+```
+go run main.go --domain="scanme.org" -r="head"
+```
+
+**output**
+
+```
+                    ____ ____ ____ _    /
+                    |___ |--| |--< |___. 
+                        Carl - V 1.0
+
+
+[Accept-Encoding]
+[text/html]
+[Mon, 08 Aug 2022 00:53:08 GMT]
+[Apache/2.4.7 (Ubuntu)]
+[bytes]
+```
+
+**NOTE: IN OTHER SCENARIOS YOU WILL SEE MUCH MORE INFORMATION BUT IN THIS CASE NOT MUCH, THIS DEPENDS ON THE DOMAIN**
 
