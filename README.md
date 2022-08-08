@@ -2708,6 +2708,362 @@ func (Config *Carl_Data) Generate() {
 }
 ```
 
-
-
 lets move onto the `Parser.go` file
+
+the parser.go file is the easiest to understand, it basically just does everything those functions do but outputs it, i do not think i need to explain this so i wont i will only explain one part which is the srv automation.
+
+```go
+package Carl_DNS
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"strings"
+)
+
+func (Config *Carl_Data) Parse_Dt() {
+	switch Config.Record {
+	case "mx":
+		Config.MX()
+		for _, l := range S.MX {
+			fmt.Println("MX  Host  |  ", l.Host)
+			fmt.Println("MX  Pref  |  ", l.Pref)
+			fmt.Println(":::::::::::")
+		}
+	case "a":
+		Config.A()
+		for _, l := range S.A {
+			fmt.Println("IP        | ", l)
+			fmt.Println("===========")
+			fmt.Println(" Is multicast                 ; ", l.IsMulticast())
+			fmt.Println(" Is loopback                  ; ", l.IsLoopback())
+			fmt.Println(" Is GlobalUnicast             ; ", l.IsGlobalUnicast())
+			fmt.Println(" Is Link Local Multicast      ; ", l.IsLinkLocalMulticast())
+			fmt.Println(" Is Link Local Unicast        ; ", l.IsLinkLocalUnicast())
+			fmt.Println(" Is Interface Local Multicast ; ", l.IsInterfaceLocalMulticast())
+			fmt.Println(" Is Private IP Address        ; ", l.IsPrivate())
+			fmt.Println(" Is Unspecified               ; ", l.IsUnspecified())
+			fmt.Println(" Defualt mask                 ; ", l.DefaultMask())
+		}
+	case "ns":
+		Config.NS()
+		for _, l := range S.NS {
+			fmt.Println("NS    ; ", l)
+		}
+	case "txt":
+		Config.TXT()
+		for _, k := range S.TXT {
+			fmt.Println("TXT   ; ", k)
+		}
+	case "cname":
+		Config.CNAME()
+		fmt.Println("CNAME ; ", string(fmt.Sprint(S.CNAME)))
+	case "ptr":
+		Config.PTR()
+		for o, l := range S.PTR {
+			fmt.Println("PTR [ ", o, " ]    ; ", l)
+		}
+	case "srv":
+		Config.SRV()
+		fmt.Print("\n\n")
+		fmt.Println("SRV Target    SRV Port    SRV Priority   SRV Weight")
+		fmt.Print("\n")
+		for i := 0; i < len(S.SRV_Target); i++ {
+			fmt.Printf("%v   **   %v   **   %v   **   %v \n", S.SRV_Target[i], S.SRV_Port[i], S.SRV_Priority[i], S.SRV_Weight[i])
+		}
+	case "server":
+		url := "http://" + Config.Domain_Name
+		d, x := http.Get(url)
+		if x != nil {
+			fmt.Println(x)
+		}
+		defer d.Body.Close()
+		fmt.Println("\n\nServer -> ", strings.Trim(fmt.Sprint(d.Header.Values("server")), "[]"))
+	case "head":
+		url := "http://" + Config.Domain_Name
+		d, x := http.Get(url)
+		if x != nil {
+			fmt.Println(x)
+		}
+		defer d.Body.Close()
+		fmt.Println("\n\n\n\n\n")
+		for _, v := range d.Header {
+			fmt.Println(v)
+		}
+	}
+}
+
+```
+
+Parse_DT is a function we will use to parse data unless the user defines `*` as a record to lookup which is not a record it just allows the user to search everything and output it into a json file which we will discuss later on.
+
+in the case statement below we use a for loop
+
+```go
+	case "srv":
+		Config.SRV()
+		fmt.Print("\n\n")
+		fmt.Println("SRV Target    SRV Port    SRV Priority   SRV Weight")
+		fmt.Print("\n")
+		for i := 0; i < len(S.SRV_Target); i++ {
+			fmt.Printf("%v   **   %v   **   %v   **   %v \n", S.SRV_Target[i], S.SRV_Port[i], S.SRV_Priority[i], S.SRV_Weight[i])
+		}
+```
+
+if we make a SRV request 9 out of 10 chances the array of results will in this program be the same length which for this we create a simple for loop to declare a variable `i` as 0, then until i is greater than the length of the `S.SRV_Target` array since each array in this program as long as there is a target should be the same length and we use that to format what we want out of the array
+
+```go
+			fmt.Printf("%v   **   %v   **   %v   **   %v \n", S.SRV_Target[i], S.SRV_Port[i], S.SRV_Priority[i], S.SRV_Weight[i])
+```
+
+will format into a table like output, we use %v to format the arrays output, and declare the array with `[i]` to keep going until the length of the array stops which is where I comes into play. i feel like i am over explaining this so i will let you judge what is going on here in this simple for loop.
+
+This is the end of the `DNS` module path, YAY! we only got two more files to work with. Lets hop out of the DNS modules path and start with the options.
+
+In the filepath `Modules/Options` there is a file called `Opts.go`, this file is responsible for handling and parsing the data from the flags to the DNS structure of CARL, here is the contents 
+
+```go
+package Carl_Options
+
+// flags and options
+
+type Options struct {
+	Domain           string
+	Record           string
+	Output           bool
+	Output_Directory string
+}
+
+```
+
+Options is a structure we will use when initating our flags, domain is the domain name, record is the record to search, output is to declare if the user wants to output, and output directory is the directory of output along with the filename. This is quite simple and does not seem used right now so lets put it to use 
+
+**main.go FILE OUTSIDE OF THE MODULES DIRECTORY TOP PART**
+
+
+```go
+package main
+
+import (
+	"fmt"
+	Carl_Bann "main/Modules/Banner"
+	Carl_DNS "main/Modules/DNS"
+	Carl_Opts "main/Modules/Options"
+	"os"
+
+	"github.com/spf13/pflag"
+)
+
+var (
+	flags = pflag.FlagSet{SortFlags: false}
+	CLIS  Carl_Opts.Options
+	Carl  Carl_DNS.Carl_Data
+)
+
+func main() {}
+
+```
+
+Woah whats going on here? a main function that does nothing? YES SIR! thats what we call the use of anonymous functions, before i start talking on those lets go through the top. We declare the modules 
+
+```
+Carl_Bann -> the banner 
+Carl_DNS  -> To import DNS functions 
+Carl_Opts -> To import the options structure
+```
+
+now we declare a few variables 
+
+`flags` which defines our pflag library which is how we will define flags and use them, we call `pflag.FlagSet` to set and initialize the flags, then name sort flags as false which obviously does not sort the flags on its own, CLIS defines the options structure for CARL, `Carl` defines the data structure for carl's DNS file which is the structure below 
+
+**Modules/DNS Functions.go**
+
+```go
+package Carl_DNS
+
+type Carl_Data struct {
+	Domain_Name string
+	Record      string
+	Filepath    string
+}
+```
+
+
+the define a function named main which is needed in order for the file and program to run, below this we use an anonymous function.
+
+```go
+//
+//
+// flag base
+//
+//
+//
+
+func init() {
+	flags.StringVarP(&CLIS.Domain, "domain", "d", "", "Specify a domain name to scan  | Required")
+	flags.StringVarP(&CLIS.Record, "record", "r", "", "Specify a DNS record to search | Required")
+	flags.BoolVarP(&CLIS.Output, "output", "o", false, "Enable JSON output File       | Optional")
+	flags.StringVarP(&CLIS.Output_Directory, "filepath", "f", "", "The output file directory | Needed if you use -o/--output")
+	flags.Parse(os.Args[1:])
+	Carl_Bann.Out()
+
+	if CLIS.Domain == "" {
+		fmt.Println("[!] ERORR: You will need t o specify a domain name here using the `--domain/-d` flag")
+		os.Exit(0)
+	} else {
+		Carl.Domain_Name = CLIS.Domain
+	}
+	if CLIS.Record == "" {
+		fmt.Println("[!] ERROR: You need to specify a DNS record you want to lookup an example being MX")
+		fmt.Println("[*] All possible lookup options are")
+		fmt.Println(" - mx       | Will get MX records")
+		fmt.Println(" - a        | Will get IPv4")
+		fmt.Println(" - ns       | Will get name servers")
+		fmt.Println(" - txt      | Will get the TXT records")
+		fmt.Println(" - cname    | Will get the Canonical Name")
+		fmt.Println(" - ptr      | Will reverse DNS")
+		fmt.Println(" - srv      | Will get the service record")
+		fmt.Println(" - server   | Will get the server")
+		fmt.Println(" - head     | Will get response headers")
+		fmt.Println(" - *        | Will run all of these options and is needed for JSON output")
+	} else {
+		Carl.Record = CLIS.Record
+		Carl.Parse_Dt()
+	}
+	if CLIS.Output {
+		if CLIS.Record != "*" {
+			fmt.Println("[!] Error: This option is only reserved for the option (*) as a record")
+			fmt.Println("[!] Error: You will need to specify the `--record` flag with * if you want")
+			fmt.Println("[!] Error: to continue, this is due to output and formatting reasons")
+			os.Exit(0)
+		} else {
+			if CLIS.Output_Directory == "" {
+				fmt.Println("[!] Error: Can not run this script, the output directory you specified is NIL / Empty. ")
+				fmt.Println("[!] Error: Please use (--filepath/-f) to specify the directory of the filepath you want")
+				fmt.Println("[*] Example: ./main --domain example.com --record * --output --filepath /home/Desktop/File.json")
+				fmt.Println("[*] NOTE   ---- You MUST specify the FULL path with the filename at the end of the json file")
+				os.Exit(0)
+			} else {
+				Carl.Filepath = CLIS.Output_Directory
+				Carl.A()
+				Carl.CNAME()
+				Carl.MX()
+				Carl.NS()
+				Carl.TXT()
+				Carl.PTR()
+				Carl.Head()
+				Carl.SRV()
+				Carl.Generate()
+			}
+		}
+	}
+}
+
+```
+
+this is quite simply we use the flags variable to define a new flag, then declare the data type function of the flag which in this case is `StringVarP` and `BoolVarP` we could use `StringVar` but we want the user to not just use long flags but short flags as well, and any function with the flags variable that ends with `P` will allow short options as a flag, then we define what we want in the flags like here 
+
+```go
+	flags.StringVarP(&CLIS.Domain, "domain", "d", "", "Specify a domain name to scan  | Required")
+```
+
+the value the user puts into this flag when running the program will be sent to the structure `CLIS.Domain`, which the user can use `--domain` or `-d` to define hence the `domain` and `-d` as the second and third argument, the fourth argument will be empty because we do not want a defualt value in this flag we cant run the program without it, then we specify the description which will be the last argument to this function.
+
+once we do this with multiple flags like `Record`, `Output` and `Output_Directory` we parse the flags and call the banner
+
+```go
+	flags.StringVarP(&CLIS.Domain, "domain", "d", "", "Specify a domain name to scan  | Required")
+	flags.StringVarP(&CLIS.Record, "record", "r", "", "Specify a DNS record to search | Required")
+	flags.BoolVarP(&CLIS.Output, "output", "o", false, "Enable JSON output File       | Optional")
+	flags.StringVarP(&CLIS.Output_Directory, "filepath", "f", "", "The output file directory | Needed if you use -o/--output")
+	flags.Parse(os.Args[1:])
+	Carl_Bann.Out()
+```
+
+Note: this function is anonymous, it runs on its own however a main block is still needed, this everything under `	flags.Parse(os.Args[1:])` will run without needing to be called in the function main or any function 
+
+`	flags.Parse(os.Args[1:])`
+
+will parse our flags, the reason we use `1` instead of `0` is because is we parsed the flags as `0` we would pick up `./main` or `main.go`. for example if we run the file as `go run main.go` the program will think `main.go` is an argument so we need to find the values AFTER declaring the file name, same for `./main`
+
+anyway we check if the flag for domain is empty
+
+```go
+	if CLIS.Domain == "" {
+		fmt.Println("[!] ERORR: You will need t o specify a domain name here using the `--domain/-d` flag")
+		os.Exit(0)
+	} else {
+		Carl.Domain_Name = CLIS.Domain
+	}
+```
+
+if it is tell the user they need it and exit, if else set CARLS domain name value with the CLIS.Domain or the value from the flag 
+
+we then check the record, this is where the building is of our program if a record is not detected do the following 
+
+```go
+	if CLIS.Record == "" {
+		fmt.Println("[!] ERROR: You need to specify a DNS record you want to lookup an example being MX")
+		fmt.Println("[*] All possible lookup options are")
+		fmt.Println(" - mx       | Will get MX records")
+		fmt.Println(" - a        | Will get IPv4")
+		fmt.Println(" - ns       | Will get name servers")
+		fmt.Println(" - txt      | Will get the TXT records")
+		fmt.Println(" - cname    | Will get the Canonical Name")
+		fmt.Println(" - ptr      | Will reverse DNS")
+		fmt.Println(" - srv      | Will get the service record")
+		fmt.Println(" - server   | Will get the server")
+		fmt.Println(" - head     | Will get response headers")
+		fmt.Println(" - *        | Will run all of these options and is needed for JSON output")
+		os.Exit(0)
+	} else {
+		Carl.Record = CLIS.Record
+		Carl.Parse_Dt()
+	}
+```
+
+output all possible options and exit, if not then parse the record into the `Parse_DT` function we made to check for every other record other than `*` which if `*` is defined as a record by the user nothing will happen other than it being set as a CARL record to search. Then we test if the user declared output, if they did move on, if the record does not equal `*` exit and print why this exited and how they should use the program 
+
+```go
+	if CLIS.Output {
+		if CLIS.Record != "*" {
+			fmt.Println("[!] Error: This option is only reserved for the option (*) as a record")
+			fmt.Println("[!] Error: You will need to specify the `--record` flag with * if you want")
+			fmt.Println("[!] Error: to continue, this is due to output and formatting reasons")
+			os.Exit(0)
+		} else {
+			if CLIS.Output_Directory == "" {
+				fmt.Println("[!] Error: Can not run this script, the output directory you specified is NIL / Empty. ")
+				fmt.Println("[!] Error: Please use (--filepath/-f) to specify the directory of the filepath you want")
+				fmt.Println("[*] Example: ./main --domain example.com --record * --output --filepath /home/Desktop/File.json")
+				fmt.Println("[*] NOTE   ---- You MUST specify the FULL path with the filename at the end of the json file")
+				os.Exit(0)
+			}
+```
+
+if else then we do the following 
+
+```go
+else {
+				Carl.Filepath = CLIS.Output_Directory
+				Carl.A()
+				Carl.CNAME()
+				Carl.MX()
+				Carl.NS()
+				Carl.TXT()
+				Carl.PTR()
+				Carl.Head()
+				Carl.SRV()
+				Carl.Generate()
+			}
+```
+
+call every function and after every function is finished generate the file, this if statement chunk looks alot like this 
+
+if user specifed output continue, if else exit, if user made an output flag or `-o/--output` then check for the record, if the record is not `*` print usage and exit, if else check if user specified dir, if they did not then do output what it should be and exit, if else run all functions in Carl.DNS package and generate the file 
+
+**CONCLUSION AND FINAL WORD**
+
+This concludes this current section, we have just fully created our first ideal remake of dig, no this is not 100% like dig not even close in terms of output but it introduced you to the go `net` package and using data types in functions even in advanced scenarios, this is clearly not as advanced as the program before but that was the goal, now lets use this.
+
