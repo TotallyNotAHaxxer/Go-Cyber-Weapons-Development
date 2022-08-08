@@ -2297,3 +2297,417 @@ this one is a tiny bit different but not by much, first we make sure we call the
 
 **NameServer Function**
 
+```go
+func (Config *Carl_Data) NS() {
+	ns, x := net.LookupNS(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup name server for the domain -> ", ns)
+	} else {
+		for _, n := range ns {
+			a := fmt.Sprint(n)
+			S.NS = append(S.NS, strings.Trim(a, "&{}."))
+		}
+	}
+}
+```
+
+the name server function is a little bit different but easy to understand, as always like all of them we simply lookup the NS using the `LookupNS` function from the net package, the values of the function `LookupNS` are all passed to the variable `ns` if there is no error we run a for loop which says under each value in `ns` to `fmt.Sprintf(n)` or format it, then append it to the name server array in the data structure and trim it of the following values `&`, `{`, `}`, and `.` we trim this because when we run the json output and do not trim those values the json output and even some other forms of output will mess up and will either cause unicode error given the output of the name server function in a structure looks like `&{[some.nameserver..}]` or will just output weird unicode in the slot which will make the JSON output not so human friendly.
+
+
+
+**MX and TXT records FUNCTIONS**
+
+```go
+//MX
+func (Config *Carl_Data) MX() {
+	mx, x := net.LookupMX(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup MX records for the domain -> ", x)
+	}
+	for _, m := range mx {
+		S.MX = append(S.MX, m)
+	}
+}
+
+// TXT
+func (Config *Carl_Data) TXT() {
+	txt, x := net.LookupTXT(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup TXT records for the domain -> ", x)
+	}
+	for _, t := range txt {
+		S.TXT = append(S.TXT, t)
+	}
+}
+```
+
+I will not be going over this, this should be understandable for now! you got this! 
+
+**BOTTOM OF FILE Modules/DNS/Functions.go**
+
+```go
+// Header
+func (Config *Carl_Data) Head() {
+	dom := "http://" + Config.Domain_Name
+
+	f, x := http.Get(dom)
+	if x != nil {
+		log.Fatal(x)
+	} else {
+		defer f.Body.Close()
+		S.METHOD = f.Request.Method
+		S.Date = strings.Trim(fmt.Sprint(f.Header.Values("date")), "[]")
+		S.SERVER = strings.Trim(fmt.Sprint(f.Header.Values("server")), "[]")
+		S.Expires = strings.Trim(fmt.Sprint(f.Header.Values("expires")), "[]")
+		S.Cache_Control = strings.Trim(fmt.Sprint(f.Header.Values("cache-control")), "[]")
+		S.STATUS = f.Status
+		S.Set_Cookie = strings.Trim(fmt.Sprint(f.Header.Values("set-cookie")), "[]")
+		S.X_frame_opts = strings.Trim(fmt.Sprint(f.Header.Values("x-frame-options")), "[]")
+		S.Content_Len = fmt.Sprint((f.Body))
+
+	}
+}
+
+// srv
+func (Config *Carl_Data) SRV() {
+	c, r, x := net.LookupSRV("xmpp-server", "tcp", Config.Domain_Name)
+	if x != nil {
+		fmt.Println("[>>] CARL   :: Could not get the SRv records from the server, got error -> ", x)
+	} else {
+		S.SRV_CNAME_BASE = c
+		for _, l := range r {
+			S.SRV_Port = append(S.SRV_Port, l.Port)
+			S.SRV_Priority = append(S.SRV_Priority, l.Priority)
+			S.SRV_Target = append(S.SRV_Target, l.Target)
+			S.SRV_Weight = append(S.SRV_Weight, l.Weight)
+		}
+	}
+}
+
+func (Config *Carl_Data) Generate() {
+	// before load trim data from NS
+	f, x := json.MarshalIndent(S, "", " ")
+	if x != nil {
+		log.Fatal(x)
+	}
+	x = ioutil.WriteFile(Config.Filepath, f, 0644)
+	if x != nil {
+		log.Fatal(x)
+	}
+}
+```
+
+
+**HEADER AND SRV FUNCTION**
+
+```go
+// Header
+func (Config *Carl_Data) Head() {
+	dom := "http://" + Config.Domain_Name
+
+	f, x := http.Get(dom)
+	if x != nil {
+		log.Fatal(x)
+	} else {
+		defer f.Body.Close()
+		S.METHOD = f.Request.Method
+		S.Date = strings.Trim(fmt.Sprint(f.Header.Values("date")), "[]")
+		S.SERVER = strings.Trim(fmt.Sprint(f.Header.Values("server")), "[]")
+		S.Expires = strings.Trim(fmt.Sprint(f.Header.Values("expires")), "[]")
+		S.Cache_Control = strings.Trim(fmt.Sprint(f.Header.Values("cache-control")), "[]")
+		S.STATUS = f.Status
+		S.Set_Cookie = strings.Trim(fmt.Sprint(f.Header.Values("set-cookie")), "[]")
+		S.X_frame_opts = strings.Trim(fmt.Sprint(f.Header.Values("x-frame-options")), "[]")
+		S.Content_Len = fmt.Sprint((f.Body))
+
+	}
+}
+
+// srv
+func (Config *Carl_Data) SRV() {
+	c, r, x := net.LookupSRV("xmpp-server", "tcp", Config.Domain_Name)
+	if x != nil {
+		fmt.Println("[>>] CARL   :: Could not get the SRv records from the server, got error -> ", x)
+	} else {
+		S.SRV_CNAME_BASE = c
+		for _, l := range r {
+			S.SRV_Port = append(S.SRV_Port, l.Port)
+			S.SRV_Priority = append(S.SRV_Priority, l.Priority)
+			S.SRV_Target = append(S.SRV_Target, l.Target)
+			S.SRV_Weight = append(S.SRV_Weight, l.Weight)
+		}
+	}
+}
+```
+
+this is pretty easy to understand even with the SRV function, lets start with the HEAD function.
+
+GO gives you a great way to interact with HTTP responses, and allows you to interact easily and manuver easily with the http package and a little thing called `Header.Values` this function allows us to search a http response header for a certian bit of information like a cookie, ip, server, date, expires or whatever that website might set as its response headers.
+
+we first make a http url out of the domain we were given by combining the two strings together 
+
+```go
+	dom := "http://" + Config.Domain_Name
+```
+
+then we make a get request, check for errors, and close the body
+
+```go
+
+	f, x := http.Get(dom)
+	if x != nil {
+		log.Fatal(x)
+	} else {
+```
+
+dom is our url we will make the request to, x is the error, f is the response from the request, note that go allows multiple ways to execute requests using http like the following 
+
+```
+POST, GET, DELETE, PUT, POSTFORM etc 
+```
+
+go also allows us to customize requests with certian http methods that are not standard with the package but we are not doing that here. We then move onto close the body and once we close it start appending data in this huge chunk 
+
+```go
+		S.METHOD = f.Request.Method
+		S.Date = strings.Trim(fmt.Sprint(f.Header.Values("date")), "[]")
+		S.SERVER = strings.Trim(fmt.Sprint(f.Header.Values("server")), "[]")
+		S.Expires = strings.Trim(fmt.Sprint(f.Header.Values("expires")), "[]")
+		S.Cache_Control = strings.Trim(fmt.Sprint(f.Header.Values("cache-control")), "[]")
+		S.STATUS = f.Status
+		S.Set_Cookie = strings.Trim(fmt.Sprint(f.Header.Values("set-cookie")), "[]")
+		S.X_frame_opts = strings.Trim(fmt.Sprint(f.Header.Values("x-frame-options")), "[]")
+		S.Content_Len = fmt.Sprint(f.ContentLength)
+```
+
+this can get confusing here so let me explain it the best i can 
+
+what we want to do is pull the value of a given keyword in the response headers, something like date or server or expires, that is simple but when we output it we get `[value]` value is the value of the searched keyword in the response headers, and example is `[GCM]` which is an example of using the `server` keyword to search. Anyway we need to remove those, but we can not ust `f.Header.Values(...)` as a argument to strings.trim so we need to format it which is where `fmt.Sprint()` comes in again, finally outside of the two `))` we declare what we want to trim and that is this `[]`
+
+the full code being 
+
+```go
+strings.Trim(fmt.Sprint(f.Header.Values("x-frame-options")), "[]")
+```
+
+summary of this is 
+
+declare trim, format the value from `f.Header.Values` then trim `[]` from the value.
+
+this goes on and on until we get all that we want which includes the cookie, the x-fra,e-options, cache control, expires, date and server.
+
+We get the rest will simply conversions of the value f such as 
+
+```go
+		S.Content_Len = fmt.Sprint(f.ContentLength)
+```
+
+which gets the content length of the response 
+
+```go
+		S.METHOD = f.Request.Method
+```
+
+Which gets the HTTP request method 
+
+```go
+		S.STATUS = f.Status
+```
+
+STATUS from the server and request
+
+
+the SRV is simple i will not be going over that function since we already went over what you need to know about the simplicity of this function.
+
+**GENERATE FUNCTION**
+
+Ah yes we have reached the final part, generating the JSON output, this next function will marshal our data structure into a JSON file 
+
+```go
+func (Config *Carl_Data) Generate() {
+	f, x := json.MarshalIndent(S, "", " ")
+	if x != nil {
+		log.Fatal(x)
+	}
+	x = ioutil.WriteFile(Config.Filepath, f, 0644)
+	if x != nil {
+		log.Fatal(x)
+	}
+}
+```
+
+I have always admired go for how easy it is to do certian things, and parsing XML, JSON, YAML and other data languages is just that certian thing. First we use the json indent function which basically formats our data type, then pass those values to f and the error to x, if x is empty then we use x again to check if an error was made during writing to the file, `Config.Filepath` is the filename or filepath the user will declare with flags, and we check the error again. The mode of this file is set to 0644 which means 
+
+`-rw-r--r--`
+
+read write read and read basically XD
+
+anyway yeah that summarizes our file functions.go
+
+**FULL CODE TO THE Modules/DNS/Functions.go FILE**
+
+```go
+package Carl_DNS
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net"
+	"net/http"
+	"strings"
+)
+
+type DNS_Record struct {
+	MX             []*net.MX
+	NS             []string
+	A              []net.IP
+	TXT            []string
+	CNAME          string
+	PTR            []string
+	SERVER         string
+	STATUS         string
+	METHOD         string
+	Expires        string
+	X_frame_opts   string
+	Date           string
+	Content_Len    string
+	Cache_Control  string
+	Set_Cookie     string
+	SRV_CNAME_BASE string
+	SRV_Target     []string
+	SRV_Port       []uint16
+	SRV_Priority   []uint16
+	SRV_Weight     []uint16
+}
+
+var S DNS_Record
+var IPs []net.IP
+
+// grab A-AAAA records (IPv4 / IPv6)
+func (Config *Carl_Data) A() {
+	r, x := net.LookupIP(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup the A and AAAA records of the domain -> ", x)
+	} else {
+		for _, A := range r {
+			IPs = append(IPs, A)
+		}
+		S.A = IPs
+	}
+}
+
+// CNAME
+func (Config *Carl_Data) CNAME() {
+	r, x := net.LookupCNAME(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup CNAME records of the domain -> ", x)
+	}
+	S.CNAME = r
+}
+
+// PTR
+
+func (Config *Carl_Data) PTR() {
+	Config.A()
+	for _, Q := range S.A {
+		v := fmt.Sprint(Q)
+		p, x := net.LookupAddr(v)
+		if x != nil {
+			fmt.Println("[>>] CARL    ::: Log - Could not lookup the PTR records for the domain -> ", x)
+		} else {
+			for _, l := range p {
+				S.PTR = append(S.PTR, l)
+			}
+		}
+	}
+}
+
+// NS
+func (Config *Carl_Data) NS() {
+	ns, x := net.LookupNS(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup name server for the domain -> ", ns)
+	} else {
+		for _, n := range ns {
+			a := fmt.Sprint(n)
+			S.NS = append(S.NS, strings.Trim(a, "&{}."))
+		}
+	}
+}
+
+// MX
+func (Config *Carl_Data) MX() {
+	mx, x := net.LookupMX(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup MX records for the domain -> ", x)
+	}
+	for _, m := range mx {
+		S.MX = append(S.MX, m)
+	}
+}
+
+// TXT
+func (Config *Carl_Data) TXT() {
+	txt, x := net.LookupTXT(string(Config.Domain_Name))
+	if x != nil {
+		fmt.Println("[>>] CARL    ::: Log - Could not lookup TXT records for the domain -> ", x)
+	}
+	for _, t := range txt {
+		S.TXT = append(S.TXT, t)
+	}
+}
+
+// Header
+func (Config *Carl_Data) Head() {
+	dom := "http://" + Config.Domain_Name
+	f, x := http.Get(dom)
+	if x != nil {
+		log.Fatal(x)
+	} else {
+		defer f.Body.Close()
+		S.METHOD = f.Request.Method
+		S.Date = strings.Trim(fmt.Sprint(f.Header.Values("date")), "[]")
+		S.SERVER = strings.Trim(fmt.Sprint(f.Header.Values("server")), "[]")
+		S.Expires = strings.Trim(fmt.Sprint(f.Header.Values("expires")), "[]")
+		S.Cache_Control = strings.Trim(fmt.Sprint(f.Header.Values("cache-control")), "[]")
+		S.STATUS = f.Status
+		S.Set_Cookie = strings.Trim(fmt.Sprint(f.Header.Values("set-cookie")), "[]")
+		S.X_frame_opts = strings.Trim(fmt.Sprint(f.Header.Values("x-frame-options")), "[]")
+		S.Content_Len = fmt.Sprint(f.ContentLength)
+
+	}
+}
+
+// srv
+func (Config *Carl_Data) SRV() {
+	c, r, x := net.LookupSRV("xmpp-server", "tcp", Config.Domain_Name)
+	if x != nil {
+		fmt.Println("[>>] CARL   :: Could not get the SRv records from the server, got error -> ", x)
+	} else {
+		S.SRV_CNAME_BASE = c
+		for _, l := range r {
+			S.SRV_Port = append(S.SRV_Port, l.Port)
+			S.SRV_Priority = append(S.SRV_Priority, l.Priority)
+			S.SRV_Target = append(S.SRV_Target, l.Target)
+			S.SRV_Weight = append(S.SRV_Weight, l.Weight)
+		}
+	}
+}
+
+func (Config *Carl_Data) Generate() {
+	f, x := json.MarshalIndent(S, "", " ")
+	if x != nil {
+		log.Fatal(x)
+	}
+	x = ioutil.WriteFile(Config.Filepath, f, 0644)
+	if x != nil {
+		log.Fatal(x)
+	}
+}
+```
+
+
+
+lets move onto the `Parser.go` file
